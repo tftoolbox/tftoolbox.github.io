@@ -1,0 +1,49 @@
+
+.hex {
+  float: left;
+  margin-left: 3px;
+  margin-bottom: -15.6px;
+}
+
+.hex.user .top {
+  border-bottom: 18px solid #d1e5f0;
+}
+
+.hex.user .bottom {
+  border-top: 18px solid #d1e5f0;
+}
+
+.hex.user .middle {
+  background: #d1e5f0;
+}
+
+.hex.enemy .top {
+  border-bottom: 18px solid #fedbc7;
+}
+
+.hex.enemy .bottom {
+  border-top: 18px solid #fedbc7;
+}
+
+.hex.enemy .middle {
+  background: #fedbc7;
+}
+
+.hex .top {
+  width: 0;
+  border-left: 31.2px solid transparent;
+  border-right: 31.2px solid transparent;
+}
+
+.hex .middle {
+  width: 62.4px;
+  height: 36px;
+  position: relative;
+}
+
+.hex .bottom {
+  width: 0;
+  border-left: 31.2px solid transparent;
+  border-right: 31.2px solid transparent;
+}
+
