@@ -1,49 +1,34 @@
 import React, { useState } from 'react';
 import './Board.css';
 import Hexagon from './Hexagon';
+import Champion from './Champion';
 
-function Board() {
+const CIRCLE_DIAMETER = 50;
+
+function Board({ enemyChampionsList, userChampionsList }) {
   const [isDragging, setDragging] = useState(false);
-  const [enemyCircles, setEnemyCircles] = useState([{ left: 9, top: 11, backgroundColor: "rgba(255, 0, 0, 1)" }, { left: 74.5, top: 11, backgroundColor: "rgba(255, 0, 0, 1)" }]);
-  const [userCircles, setUserCircles] = useState([{ left: 433.85, top: 405.1, backgroundColor: "rgba(0, 255, 0, 1)" }, { left: 368.5, top: 405.1, backgroundColor: "rgba(0, 0, 255, 1)" }]);
+  const [enemyChampions, setEnemyChampions] = useState(enemyChampionsList);
+  const [userChampions, setUserChampions] = useState(userChampionsList);
   const [draggedPlayer, setDraggedPlayer] = useState(null);
   const [dragStartIndex, setDragStartIndex] = useState(null);
 
-  const areCirclesOverlapping = (circle1, circle2) => {
-    const dx = circle1.left - circle2.left;
-    const dy = circle1.top - circle2.top;
+  const areChampionsOverlapping = (champion1, champion2) => {
+    const dx = champion1.currentPosition.left - champion2.currentPosition.left;
+    const dy = champion1.currentPosition.top - champion2.currentPosition.top;
     const distance = Math.sqrt(dx * dx + dy * dy);
-    return distance < 50; // You may need to adjust this threshold based on your circle size
-  };
-
-  const handleDragStart = (event, player, index) => {
-    if (player === 'enemy') {
-      event.preventDefault(); // Prevent dragging for enemy circles
-      return;
-    }
-
-    event.dataTransfer.setData('text/plain', 'circle'); // Data to be transferred during drag
-    setDragging(true);
-    setDraggedPlayer(player);
-    setDragStartIndex(index);
+    return distance < CIRCLE_DIAMETER; 
   };
 
   const handleCircleDragStart = (event, player, index) => {
     if (player === 'enemy') {
-      event.preventDefault(); // Prevent dragging for enemy circles
+      event.preventDefault(); // prevent dragging for enemy circles
       return;
     }
 
-    event.dataTransfer.setData('text/plain', 'circle'); // Data to be transferred during drag
+    event.dataTransfer.setData('text/plain', 'champion'); 
     setDragging(true);
     setDraggedPlayer(player);
     setDragStartIndex(index);
-  };
-
-  const handleDragEnd = () => {
-    setDragging(false);
-    setDraggedPlayer(null);
-    setDragStartIndex(null);
   };
 
   const handleCircleDragEnd = () => {
@@ -57,6 +42,18 @@ function Board() {
     event.preventDefault();
   };
 
+  const convertToPixels = (coordinate, leftOrTop, even) => {
+    if (leftOrTop === 'left') {
+      if (even) {
+        return 32.7 + ((coordinate + 1) * 2.95) + (coordinate * 62.4) + 62.4 / 2;
+      }
+      return ((coordinate + 1) * 2.95) + (coordinate * 62.4) + 62.4 / 2;
+    }
+    if (leftOrTop === 'top') {
+      return (coordinate * 20.3) + (coordinate * 36) + 36;
+    }
+  }
+
   const handleDrop = (event, hexagonCoordinates, player) => {
     event.preventDefault();
 
@@ -64,88 +61,93 @@ function Board() {
       return;
     }
     if (player === 'user' && dragStartIndex !== null) {
-      const circle = document.querySelector('.circle-overlay');
-      const hexagonCenterX = hexagonCoordinates.even + ((hexagonCoordinates.left + 1) * 2.95) + (hexagonCoordinates.left * 62.4) + 62.4 / 2;
-      const hexagonCenterY = ((hexagonCoordinates.top) * 20.3) + (hexagonCoordinates.top * 36) + 36;
+      const hexagonCenterX = convertToPixels(hexagonCoordinates.left, 'left', hexagonCoordinates.top % 2 === 1);
+      const hexagonCenterY = convertToPixels(hexagonCoordinates.top, 'top', hexagonCoordinates.top % 2 === 1);
 
       const targetHexagon = {
-        left: hexagonCenterX - circle.clientWidth / 2,
-        top: hexagonCenterY - circle.clientHeight / 2,
+        currentPosition: {
+          left: hexagonCenterX - (CIRCLE_DIAMETER / 2),
+          top: hexagonCenterY - (CIRCLE_DIAMETER / 2)
+        }
       };
 
-      const overlappingIndex = userCircles.findIndex(
-        (circle, index) => index !== dragStartIndex && areCirclesOverlapping(circle, targetHexagon)
+      const overlappingIndex = userChampions.findIndex(
+        (champion, index) => index !== dragStartIndex && areChampionsOverlapping(champion, targetHexagon)
       );
 
       if (overlappingIndex !== -1) {
-        setUserCircles((prevCircles) => {
-          const updatedCircles = [...prevCircles];
-          updatedCircles[overlappingIndex] = {
-            ...prevCircles[overlappingIndex], 
-            left: prevCircles[dragStartIndex].left, 
-            top: prevCircles[dragStartIndex].top
+        setUserChampions((prevUserChampions) => {
+          const updatedUserChampions = [...prevUserChampions];
+          updatedUserChampions[overlappingIndex] = {
+            ...prevUserChampions[overlappingIndex], 
+            startingPosition: { left: prevUserChampions[dragStartIndex].startingPosition.left, top: prevUserChampions[dragStartIndex].startingPosition.top },
+            currentPosition: { left: prevUserChampions[dragStartIndex].currentPosition.left, top: prevUserChampions[dragStartIndex].currentPosition.top }
           };
-          updatedCircles[dragStartIndex] = {
-            ...prevCircles[dragStartIndex],
-            left: targetHexagon.left, 
-            top: targetHexagon.top
+          updatedUserChampions[dragStartIndex] = {
+            ...prevUserChampions[dragStartIndex],
+            startingPosition: { left: targetHexagon.currentPosition.left, top: targetHexagon.currentPosition.top },
+            currentPosition: { left: targetHexagon.currentPosition.left, top: targetHexagon.currentPosition.top }
           };
-          return updatedCircles;
+          return updatedUserChampions;
         });
       } else {
-        setUserCircles((prevCircles) => {
-          const updatedCircles = [...prevCircles];
-          updatedCircles[dragStartIndex] = {
-            ...targetHexagon,
-            backgroundColor: updatedCircles[dragStartIndex].backgroundColor, // Maintain color
+        setUserChampions((prevUserChampions) => {
+          const updatedUserChampions = [...prevUserChampions];
+          updatedUserChampions[dragStartIndex] = {
+            ...prevUserChampions[dragStartIndex],
+            startingPosition: { left: targetHexagon.currentPosition.left, top: targetHexagon.currentPosition.top },
+            currentPosition: { left: targetHexagon.currentPosition.left, top: targetHexagon.currentPosition.top },
+            image: updatedUserChampions[dragStartIndex].image
           };
-          return updatedCircles;
+          return updatedUserChampions;
         });
       }
     }
   };
 
-  const handleCircleDrop = (event, circleCoordinates, player) => {
+  const handleCircleDrop = (event, circleCoordinates) => {
     event.preventDefault();
 
     if (draggedPlayer === 'enemy') {
       return;
     }
-    if (player === 'user' && dragStartIndex !== null) {
-      const circle = document.querySelector('.circle-overlay');
-
-      const targetCircle = {
-        left: circleCoordinates.left,
-        top: circleCoordinates.top
+    if (circleCoordinates.top >= 230 && dragStartIndex !== null) {
+      const targetChampion = {
+        currentPosition: {
+          left: circleCoordinates.left,
+          top: circleCoordinates.top
+        }
       };
 
-      const overlappingIndex = userCircles.findIndex(
-        (circle, index) => index !== dragStartIndex && areCirclesOverlapping(circle, targetCircle)
+      const overlappingIndex = userChampions.findIndex(
+        (champion, index) => index !== dragStartIndex && areChampionsOverlapping(champion, targetChampion)
       );
 
       if (overlappingIndex !== -1) {
-        setUserCircles((prevCircles) => {
-          const updatedCircles = [...prevCircles];
-          updatedCircles[overlappingIndex] = {
-            ...prevCircles[overlappingIndex], 
-            left: prevCircles[dragStartIndex].left, 
-            top: prevCircles[dragStartIndex].top
+        setUserChampions((prevUserChampions) => {
+          const updatedUserChampions = [...prevUserChampions];
+          updatedUserChampions[overlappingIndex] = {
+            ...prevUserChampions[overlappingIndex], 
+            startingPosition: { left: prevUserChampions[dragStartIndex].startingPosition.left, top: prevUserChampions[dragStartIndex].startingPosition.top },
+            currentPosition: { left: prevUserChampions[dragStartIndex].currentPosition.left, top: prevUserChampions[dragStartIndex].currentPosition.top }
           };
-          updatedCircles[dragStartIndex] = {
-            ...prevCircles[dragStartIndex],
-            left: targetCircle.left, 
-            top: targetCircle.top
+          updatedUserChampions[dragStartIndex] = {
+            ...prevUserChampions[dragStartIndex],
+            startingPosition: { left: targetChampion.currentPosition.left, top: targetChampion.currentPosition.top },
+            currentPosition: { left: targetChampion.currentPosition.left, top: targetChampion.currentPosition.top }
           };
-          return updatedCircles;
+          return updatedUserChampions;
         });
       } else {
-        setUserCircles((prevCircles) => {
-          const updatedCircles = [...prevCircles];
-          updatedCircles[dragStartIndex] = {
-            ...targetCircle,
-            backgroundColor: updatedCircles[dragStartIndex].backgroundColor, 
+        setUserChampions((prevUserChampions) => {
+          const updatedUserChampions = [...prevUserChampions];
+          updatedUserChampions[dragStartIndex] = {
+            ...prevUserChampions[dragStartIndex],
+            startingPosition: { left: targetChampion.currentPosition.left, top: targetChampion.currentPosition.top },
+            currentPosition: { left: targetChampion.currentPosition.left, top: targetChampion.currentPosition.top },
+            image: updatedUserChampions[dragStartIndex].image
           };
-          return updatedCircles;
+          return updatedUserChampions;
         });
       }
     }
@@ -154,17 +156,29 @@ function Board() {
   return (
       <div>
         <div className='hex-row'>
-          {enemyCircles.map((circle, index) => (
+          {enemyChampions.map((champion, index) => (
             <div
               key={index}
               className={`circle-overlay ${isDragging && draggedPlayer === 'enemy' ? 'dragging' : ''}`}
-              style={{ left: circle.left + 'px', top: circle.top + 'px', backgroundColor: circle.backgroundColor }}
+              style={{ left: champion.currentPosition.left + 'px', top: champion.currentPosition.top + 'px' }}
               draggable
-              onDragStart={(e) => handleCircleDragStart(e, 'user', index)}
+              onDragStart={(e) => handleCircleDragStart(e, 'enemy', index)}
               onDragEnd={handleCircleDragEnd}
               onDragOver={(e) => handleDragOver(e)}
-              onDrop={(e) => handleCircleDrop(e, { left: circle.left, top: circle.top }, 'user')}
-            ></div>
+              onDrop={(e) => handleCircleDrop(e, { left: champion.currentPosition.left, top: champion.currentPosition.top }, 'enemy')}
+            >
+              <Champion
+                key={index}
+                team={'enemy'}
+                startingPosition={champion.startingPosition}
+                currentPosition={champion.currentPosition}
+                image={champion.image}
+                type={champion.type}
+                starLevel={champion.starLevel}
+                headliner={champion.headliner}
+                items={champion.items}
+              ></Champion>
+            </div>
           ))}
           <Hexagon player='enemy' onDragOver={handleDragOver} onDrop={(e) => handleDrop(e, { left: 0, top: 0, even: 0 }, 'enemy')} hexagonCoordinates={{ left: 0, top: 0, even: 0 }}/>
           <Hexagon player='enemy' onDragOver={handleDragOver} onDrop={(e) => handleDrop(e, { left: 1, top: 0, even: 0 }, 'enemy')} hexagonCoordinates={{ left: 1, top: 0, even: 0 }}/>
@@ -229,17 +243,29 @@ function Board() {
           <Hexagon player='user' onDragOver={handleDragOver} onDrop={(e) => handleDrop(e, { left: 6, top: 6, even: 0 }, 'user')} hexagonCoordinates={{ left: 6, top: 6, even: 0 }}/>
         </div>
         <div className='hex-row even'>
-          {userCircles.map((circle, index) => (
+          {userChampions.map((champion, index) => (
             <div
               key={index}
               className={`circle-overlay ${isDragging && draggedPlayer === 'user' ? 'dragging' : ''}`}
-              style={{ left: circle.left + 'px', top: circle.top + 'px', backgroundColor: circle.backgroundColor }}
+              style={{ left: champion.currentPosition.left + 'px', top: champion.currentPosition.top + 'px' }}
               draggable
               onDragStart={(e) => handleCircleDragStart(e, 'user', index)}
               onDragEnd={handleCircleDragEnd}
               onDragOver={(e) => handleDragOver(e)}
-              onDrop={(e) => handleCircleDrop(e, { left: circle.left, top: circle.top }, 'user')}
-            ></div>
+              onDrop={(e) => handleCircleDrop(e, { left: champion.currentPosition.left, top: champion.currentPosition.top }, 'user')}
+            >
+              <Champion
+                key={index}
+                team={'user'}
+                startingPosition={champion.startingPosition}
+                currentPosition={champion.currentPosition}
+                image={champion.image}
+                type={champion.type}
+                starLevel={champion.starLevel}
+                headliner={champion.headliner}
+                items={champion.items}
+              ></Champion>
+            </div>
           ))}
           <Hexagon player='user' onDragOver={handleDragOver} onDrop={(e) => handleDrop(e, { left: 0, top: 7, even: 32.7 }, 'user')} hexagonCoordinates={{ left: 0, top: 7, even: 32.7 }}/>
           <Hexagon player='user' onDragOver={handleDragOver} onDrop={(e) => handleDrop(e, { left: 1, top: 7, even: 32.7 }, 'user')} hexagonCoordinates={{ left: 1, top: 7, even: 32.7 }}/>
