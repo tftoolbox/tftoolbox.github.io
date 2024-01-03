@@ -5,6 +5,79 @@ import Champion from './Champion';
 
 const CIRCLE_DIAMETER = 50;
 
+const adjacentHexagons = {
+  0: { 
+    0: [[0, 1], [1, 0]],
+    1: [[0, 0], [1, 0], [1, 1], [1, 2], [0, 2]],
+    2: [[0, 1], [1, 2], [0, 3]],
+    3: [[0, 2], [1, 2], [1, 3], [1, 4], [0, 4]],
+    4: [[0, 3], [1, 4], [0, 5]],
+    5: [[0, 4], [1, 4], [1, 5], [1, 6], [0, 6]],
+    6: [[0, 5], [1, 6], [0, 7]],
+    7: [[0, 6], [1, 6], [1, 7]],
+  },
+  1: { 
+    0: [[0, 0], [0, 1], [1, 1], [2, 0]],
+    1: [[1, 0], [0, 1], [1, 2], [2, 2], [2, 1], [2, 0]],
+    2: [[0, 1], [0, 2], [0, 3], [1, 3], [2, 2], [1, 1]],
+    3: [[1, 2], [0, 3], [1, 4], [2, 4], [2, 3], [2, 2]],
+    4: [[0, 3], [0, 4], [0, 5], [1, 5], [2, 4], [1, 3]],
+    5: [[1, 4], [0, 5], [1, 6], [2, 6], [2, 5], [2, 4]],
+    6: [[0, 5], [0, 6], [0, 7], [1, 7], [2, 6], [1, 5]],
+    7: [[1, 6], [0, 7], [2, 6], [2, 7]],
+  },
+  2: { 
+    0: [[1, 0], [1, 1], [2, 1], [3, 0]],
+    1: [[2, 0], [1, 1], [2, 2], [3, 2], [3, 1], [3, 0]],
+    2: [[1, 1], [1, 2], [1, 3], [2, 3], [3, 2], [2, 1]],
+    3: [[2, 2], [1, 3], [2, 4], [3, 4], [3, 3], [3, 2]],
+    4: [[1, 3], [1, 4], [1, 5], [2, 5], [3, 4], [2, 3]],
+    5: [[2, 4], [1, 5], [2, 6], [3, 6], [3, 5], [3, 4]],
+    6: [[1, 5], [1, 6], [1, 7], [2, 7], [3, 6], [2, 5]],
+    7: [[2, 6], [1, 7], [3, 6], [3, 7]],
+  },
+  3: { 
+    0: [[2, 0], [2, 1], [3, 1], [4, 0]],
+    1: [[3, 0], [2, 1], [3, 2], [4, 2], [4, 1], [4, 0]],
+    2: [[2, 1], [2, 2], [2, 3], [3, 3], [4, 2], [3, 1]],
+    3: [[3, 2], [2, 3], [3, 4], [4, 4], [4, 3], [4, 2]],
+    4: [[2, 3], [2, 4], [2, 5], [3, 5], [4, 4], [3, 3]],
+    5: [[3, 4], [2, 5], [3, 6], [4, 6], [4, 5], [4, 4]],
+    6: [[2, 5], [2, 6], [2, 7], [3, 7], [4, 6], [3, 5]],
+    7: [[3, 6], [2, 7], [4, 6], [4, 7]],
+  },
+  4: { 
+    0: [[3, 0], [3, 1], [4, 1], [5, 0]],
+    1: [[4, 0], [3, 1], [4, 2], [5, 2], [5, 1], [5, 0]],
+    2: [[3, 1], [3, 2], [3, 3], [4, 3], [5, 2], [4, 1]],
+    3: [[4, 2], [3, 3], [4, 4], [5, 4], [5, 3], [5, 2]],
+    4: [[3, 3], [3, 4], [3, 5], [4, 5], [5, 4], [4, 3]],
+    5: [[4, 4], [3, 5], [4, 6], [5, 6], [5, 5], [5, 4]],
+    6: [[3, 5], [3, 6], [3, 7], [4, 7], [5, 6], [4, 5]],
+    7: [[4, 6], [3, 7], [5, 6], [5, 7]],
+  },
+  5: { 
+    0: [[4, 0], [4, 1], [5, 1], [6, 0]],
+    1: [[5, 0], [4, 1], [5, 2], [6, 2], [6, 1], [6, 0]],
+    2: [[4, 1], [4, 2], [4, 3], [5, 3], [6, 2], [5, 1]],
+    3: [[5, 2], [4, 3], [5, 4], [6, 4], [6, 3], [6, 2]],
+    4: [[4, 3], [4, 4], [4, 5], [5, 5], [6, 4], [5, 3]],
+    5: [[5, 4], [4, 5], [5, 6], [6, 6], [6, 5], [6, 4]],
+    6: [[4, 5], [4, 6], [4, 7], [5, 7], [6, 6], [5, 5]],
+    7: [[5, 6], [4, 7], [6, 6], [6, 7]],
+  },
+  6: { 
+    0: [[5, 0], [5, 1], [6, 1]],
+    1: [[6, 0], [5, 1], [6, 2]],
+    2: [[6, 1], [5, 1], [5, 2], [5, 3], [6, 3]],
+    3: [[6, 2], [5, 3], [6, 4]],
+    4: [[6, 3], [5, 3], [5, 4], [5, 5], [6, 5]],
+    5: [[6, 4], [5, 5], [6, 6]],
+    6: [[6, 5], [5, 5], [5, 6], [5, 7], [6, 7]],
+    7: [[6, 6], [5, 7]],
+  },
+}
+
 function Board({ enemyChampionsList, userChampionsList }) {
   const [isDragging, setDragging] = useState(false);
   const [enemyChampions, setEnemyChampions] = useState(enemyChampionsList);
@@ -54,6 +127,18 @@ function Board({ enemyChampionsList, userChampionsList }) {
     }
   }
 
+  const convertToHexagons = (coordinate, leftOrTop, even) => {
+    if (leftOrTop === 'left') {
+      if (even) {
+        return Math.floor((coordinate - 32.7 - 2.95 - 31.2) / (2.95 + 62.4));
+      }
+      return Math.floor((coordinate - 2.95 - 31.2) / (2.95 + 62.4));
+    }
+    if (leftOrTop === 'top') {
+      return Math.floor((coordinate - 36) / (20.3 + 36));
+    }
+  }
+
   const handleDrop = (event, hexagonCoordinates, player) => {
     event.preventDefault();
 
@@ -80,12 +165,12 @@ function Board({ enemyChampionsList, userChampionsList }) {
           const updatedUserChampions = [...prevUserChampions];
           updatedUserChampions[overlappingIndex] = {
             ...prevUserChampions[overlappingIndex], 
-            startingPosition: { left: prevUserChampions[dragStartIndex].startingPosition.left, top: prevUserChampions[dragStartIndex].startingPosition.top },
+            hexagonPosition: { left: prevUserChampions[dragStartIndex].hexagonPosition.left, top: prevUserChampions[dragStartIndex].hexagonPosition.top },
             currentPosition: { left: prevUserChampions[dragStartIndex].currentPosition.left, top: prevUserChampions[dragStartIndex].currentPosition.top }
           };
           updatedUserChampions[dragStartIndex] = {
             ...prevUserChampions[dragStartIndex],
-            startingPosition: { left: targetHexagon.currentPosition.left, top: targetHexagon.currentPosition.top },
+            hexagonPosition: { left: hexagonCoordinates.left, top: hexagonCoordinates.top },
             currentPosition: { left: targetHexagon.currentPosition.left, top: targetHexagon.currentPosition.top }
           };
           return updatedUserChampions;
@@ -95,7 +180,7 @@ function Board({ enemyChampionsList, userChampionsList }) {
           const updatedUserChampions = [...prevUserChampions];
           updatedUserChampions[dragStartIndex] = {
             ...prevUserChampions[dragStartIndex],
-            startingPosition: { left: targetHexagon.currentPosition.left, top: targetHexagon.currentPosition.top },
+            hexagonPosition: { left: hexagonCoordinates.left, top: hexagonCoordinates.top },
             currentPosition: { left: targetHexagon.currentPosition.left, top: targetHexagon.currentPosition.top },
             image: updatedUserChampions[dragStartIndex].image
           };
@@ -105,7 +190,7 @@ function Board({ enemyChampionsList, userChampionsList }) {
     }
   };
 
-  const handleCircleDrop = (event, circleCoordinates) => {
+  const handleCircleDrop = (event, circleCoordinates, index) => {
     event.preventDefault();
 
     if (draggedPlayer === 'enemy') {
@@ -128,12 +213,12 @@ function Board({ enemyChampionsList, userChampionsList }) {
           const updatedUserChampions = [...prevUserChampions];
           updatedUserChampions[overlappingIndex] = {
             ...prevUserChampions[overlappingIndex], 
-            startingPosition: { left: prevUserChampions[dragStartIndex].startingPosition.left, top: prevUserChampions[dragStartIndex].startingPosition.top },
+            hexagonPosition: { left: prevUserChampions[dragStartIndex].hexagonPosition.left, top: prevUserChampions[dragStartIndex].hexagonPosition.top },
             currentPosition: { left: prevUserChampions[dragStartIndex].currentPosition.left, top: prevUserChampions[dragStartIndex].currentPosition.top }
           };
           updatedUserChampions[dragStartIndex] = {
             ...prevUserChampions[dragStartIndex],
-            startingPosition: { left: targetChampion.currentPosition.left, top: targetChampion.currentPosition.top },
+            hexagonPosition: { left: prevUserChampions[index].hexagonPosition.left, top: prevUserChampions[index].hexagonPosition.top },
             currentPosition: { left: targetChampion.currentPosition.left, top: targetChampion.currentPosition.top }
           };
           return updatedUserChampions;
@@ -143,7 +228,7 @@ function Board({ enemyChampionsList, userChampionsList }) {
           const updatedUserChampions = [...prevUserChampions];
           updatedUserChampions[dragStartIndex] = {
             ...prevUserChampions[dragStartIndex],
-            startingPosition: { left: targetChampion.currentPosition.left, top: targetChampion.currentPosition.top },
+            hexagonPosition: { left: prevUserChampions[index].hexagonPosition.left, top: prevUserChampions[index].hexagonPosition.top },
             currentPosition: { left: targetChampion.currentPosition.left, top: targetChampion.currentPosition.top },
             image: updatedUserChampions[dragStartIndex].image
           };
@@ -152,6 +237,7 @@ function Board({ enemyChampionsList, userChampionsList }) {
       }
     }
   };
+  console.log(userChampions);
 
   return (
       <div>
@@ -165,12 +251,12 @@ function Board({ enemyChampionsList, userChampionsList }) {
               onDragStart={(e) => handleCircleDragStart(e, 'enemy', index)}
               onDragEnd={handleCircleDragEnd}
               onDragOver={(e) => handleDragOver(e)}
-              onDrop={(e) => handleCircleDrop(e, { left: champion.currentPosition.left, top: champion.currentPosition.top }, 'enemy')}
+              onDrop={(e) => handleCircleDrop(e, { left: champion.currentPosition.left, top: champion.currentPosition.top }, index)}
             >
               <Champion
                 key={index}
                 team={'enemy'}
-                startingPosition={champion.startingPosition}
+                hexagonPosition={champion.hexagonPosition}
                 currentPosition={champion.currentPosition}
                 image={champion.image}
                 type={champion.type}
@@ -252,12 +338,12 @@ function Board({ enemyChampionsList, userChampionsList }) {
               onDragStart={(e) => handleCircleDragStart(e, 'user', index)}
               onDragEnd={handleCircleDragEnd}
               onDragOver={(e) => handleDragOver(e)}
-              onDrop={(e) => handleCircleDrop(e, { left: champion.currentPosition.left, top: champion.currentPosition.top }, 'user')}
+              onDrop={(e) => handleCircleDrop(e, { left: champion.currentPosition.left, top: champion.currentPosition.top }, index)}
             >
               <Champion
                 key={index}
                 team={'user'}
-                startingPosition={champion.startingPosition}
+                hexagonPosition={champion.hexagonPosition}
                 currentPosition={champion.currentPosition}
                 image={champion.image}
                 type={champion.type}

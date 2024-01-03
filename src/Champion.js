@@ -1,7 +1,7 @@
 import React from 'react';
 import './Champion.css'; 
 
-function Champion({ key, team, startingPosition, currentPosition, image, type, starLevel, headliner, items }) {
+function Champion({ key, team, hexagonPosition, currentPosition, image, type, starLevel, headliner, items }) {
   return (
     <div
       className={"champion"}
