@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './Board.css';
 import Hexagon from './Hexagon';
 import Champion from './Champion';
@@ -78,12 +78,115 @@ const adjacentHexagons = {
   },
 }
 
+function getNeighbors(champion) {
+  const left = champion.hexagonPosition.left;
+  const top = champion.hexagonPosition.top;
+
+  if (adjacentHexagons[left] && adjacentHexagons[left][top]) {
+    return adjacentHexagons[left][top];
+  }
+
+  return [];
+}
+
+function isAdjacent(champion1, champion2) {
+  const hex1 = [champion1.hexagonPosition.left, champion1.hexagonPosition.top];
+  const hex2 = [champion2.hexagonPosition.left, champion2.hexagonPosition.top];
+  const neighbors = getNeighbors({ hexagonPosition: { left: hex1[0], top: hex1[1] } });
+  
+  return neighbors.some(neighbor => neighbor[0] === hex2[0] && neighbor[1] === hex2[1]);
+}
+
+function findShortestPath(champions, start, end) {
+  const visited = new Set();
+  const queue = [[start]];
+  
+  while (queue.length > 0) {
+    console.log(queue);
+    const path = queue.shift();
+    const currentHexagon = path[path.length - 1];
+
+    if (isAdjacent({ hexagonPosition: { left: currentHexagon[0], top: currentHexagon[1] } }, end)) {
+      return path;
+    }
+
+    if (!visited.has(currentHexagon.toString())) {
+      visited.add(currentHexagon.toString());
+
+      const neighbors = getNeighbors({ hexagonPosition: { left: currentHexagon[0], top: currentHexagon[1] } });
+      
+      for (const neighbor of neighbors) {
+        const neighborStr = neighbor.toString();
+        const isChampionOccupied = champions.some(c => c.hexagonPosition.left === neighbor[0] && c.hexagonPosition.top === neighbor[1]);
+
+        if (!visited.has(neighborStr) && !isChampionOccupied) {
+          const newPath = [...path, neighbor];
+          queue.push(newPath);
+        }
+      }
+    }
+  }
+  return null;
+}
+
+function findClosestEnemy(userChampion, enemyChampions) {
+  let closestEnemy = null;
+  let minDistance = Infinity;
+
+  for (const enemyChampion of enemyChampions) {
+    const distance = findShortestPath(
+      enemyChampions,
+      { hexagonPosition: { left: userChampion.hexagonPosition.left, top: userChampion.hexagonPosition.top } },
+      { hexagonPosition: { left: enemyChampion.hexagonPosition.left, top: enemyChampion.hexagonPosition.top } }
+    );
+    console.log(distance);
+
+    if (distance && distance.length < minDistance) {
+      minDistance = distance.length;
+      closestEnemy = enemyChampion;
+    }
+  }
+
+  return closestEnemy;
+}
+
 function Board({ enemyChampionsList, userChampionsList }) {
   const [isDragging, setDragging] = useState(false);
   const [enemyChampions, setEnemyChampions] = useState(enemyChampionsList);
   const [userChampions, setUserChampions] = useState(userChampionsList);
   const [draggedPlayer, setDraggedPlayer] = useState(null);
   const [dragStartIndex, setDragStartIndex] = useState(null);
+  const [isCombatActive, setCombatActive] = useState(false);
+
+  const startCombat = () => {
+    setCombatActive(true);
+  }
+
+  useEffect(() => {
+    if (isCombatActive) {
+      const updatedUserChampions = userChampions.map(userChampion => {
+        const closestEnemy = findClosestEnemy(userChampion, enemyChampions);
+        if (closestEnemy) {
+          const shortestPath = findShortestPath(userChampions, userChampion.hexagonPosition, closestEnemy.hexagonPosition);
+          // Animate the movement along the path (you may need to implement animation logic)
+          // For simplicity, we will update the position directly without animation
+          if (shortestPath && shortestPath.length > 1) {
+            const targetHexagon = shortestPath[1]; // The next hexagon in the path
+            const targetPixelLeft = convertToPixels(targetHexagon[0], 'left', targetHexagon[1] % 2 === 1);
+            const targetPixelTop = convertToPixels(targetHexagon[1], 'top', targetHexagon[1] % 2 === 1);
+            return {
+              ...userChampion,
+              hexagonPosition: { left: targetHexagon[0], top: targetHexagon[1] },
+              currentPosition: { left: targetPixelLeft, top: targetPixelTop },
+            };
+          }
+        }
+        return userChampion;
+      });
+
+      setUserChampions(updatedUserChampions);
+    }
+  }, [userChampions, isCombatActive]);
 
   const areChampionsOverlapping = (champion1, champion2) => {
     const dx = champion1.currentPosition.left - champion2.currentPosition.left;
@@ -145,6 +248,10 @@ function Board({ enemyChampionsList, userChampionsList }) {
     if (draggedPlayer === 'enemy') {
       return;
     }
+    if (isCombatActive) {
+      event.preventDefault();
+      return;
+    }
     if (player === 'user' && dragStartIndex !== null) {
       const hexagonCenterX = convertToPixels(hexagonCoordinates.left, 'left', hexagonCoordinates.top % 2 === 1);
       const hexagonCenterY = convertToPixels(hexagonCoordinates.top, 'top', hexagonCoordinates.top % 2 === 1);
@@ -196,6 +303,10 @@ function Board({ enemyChampionsList, userChampionsList }) {
     if (draggedPlayer === 'enemy') {
       return;
     }
+    if (isCombatActive) {
+      event.preventDefault();
+      return;
+    }
     if (circleCoordinates.top >= 230 && dragStartIndex !== null) {
       const targetChampion = {
         currentPosition: {
@@ -237,6 +348,8 @@ function Board({ enemyChampionsList, userChampionsList }) {
       }
     }
   };
+
+  console.log(isCombatActive);
   console.log(userChampions);
 
   return (
@@ -361,6 +474,7 @@ function Board({ enemyChampionsList, userChampionsList }) {
           <Hexagon player='user' onDragOver={handleDragOver} onDrop={(e) => handleDrop(e, { left: 5, top: 7, even: 32.7 }, 'user')} hexagonCoordinates={{ left: 5, top: 7, even: 32.7 }}/>
           <Hexagon player='user' onDragOver={handleDragOver} onDrop={(e) => handleDrop(e, { left: 6, top: 7, even: 32.7 }, 'user')} hexagonCoordinates={{ left: 6, top: 7, even: 32.7 }}/>
         </div>
+        <button onClick={startCombat}>Start Combat</button>
       </div>
   );
 }
