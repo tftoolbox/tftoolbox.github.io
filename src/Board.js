@@ -81,7 +81,6 @@ const adjacentHexagons = {
 function getNeighbors(champion) {
   const left = champion.hexagonPosition.left;
   const top = champion.hexagonPosition.top;
-
   if (adjacentHexagons[left] && adjacentHexagons[left][top]) {
     return adjacentHexagons[left][top];
   }
@@ -97,31 +96,134 @@ function isAdjacent(champion1, champion2) {
   return neighbors.some(neighbor => neighbor[0] === hex2[0] && neighbor[1] === hex2[1]);
 }
 
-function findShortestPath(champions, start, end) {
+function findShortestPath(champions, start, end, attackRange) {
   const visited = new Set();
   const queue = [[start]];
   
   while (queue.length > 0) {
-    console.log(queue);
     const path = queue.shift();
     const currentHexagon = path[path.length - 1];
 
-    if (isAdjacent({ hexagonPosition: { left: currentHexagon[0], top: currentHexagon[1] } }, end)) {
-      return path;
-    }
+    if (currentHexagon[0] !== undefined && currentHexagon[0] !== null) {
+      // if (isAdjacent({ hexagonPosition: { left: currentHexagon[0], top: currentHexagon[1] } }, end)) {
+      //   return path;
+      // }
 
-    if (!visited.has(currentHexagon.toString())) {
-      visited.add(currentHexagon.toString());
+      if (!visited.has(currentHexagon.toString())) {
+        visited.add(currentHexagon.toString());
+  
+        const neighbors = getNeighbors({hexagonPosition: {left: currentHexagon[0], top: currentHexagon[1]}});
+        
+        for (const neighbor of neighbors) {
+  
+          const neighborStr = neighbor.toString();
+          const isChampionOccupied = champions.some(c => c.hexagonPosition.left === neighbor[0] && c.hexagonPosition.top === neighbor[1]);
+  
+          if (!visited.has(neighborStr) && !isChampionOccupied) {
+          
+            // Check attack range
+            if (attackRange === 1) {
+              if (isAdjacent({ hexagonPosition: { left: currentHexagon[0], top: currentHexagon[1] } }, end)) {
+                return path;
+              }
+            }
+            if (attackRange === 2) {
+              if (isAdjacent({hexagonPosition: {left: neighbor[0], top: neighbor[1]}}, end)) {
+                return path;
+              }
+            } else if (attackRange === 3) {
+              const neighborNeighbors = getNeighbors({hexagonPosition: {left: neighbor[0], top: neighbor[1]}});
+              if (neighborNeighbors.some(n => isAdjacent({hexagonPosition: {left: n[0], top: n[1]}}, end))) {
+                return path; 
+              }
+            } else if (attackRange === 4) {
+              const neighborNeighbors = getNeighbors({hexagonPosition: {left: neighbor[0], top: neighbor[1]}});
+              const neighborNeighborNeighbors = [];
+              for (const n of neighborNeighbors) {
+                neighborNeighborNeighbors.push(...getNeighbors({hexagonPosition: {left: n[0], top: n[1]}})); 
+              }
+              if (neighborNeighborNeighbors.some(n => isAdjacent({hexagonPosition: {left: n[0], top: n[1]}}, end))) {
+                return path;
+              }
+            } else if (attackRange === 5) {
+              const neighborNeighbors = getNeighbors({hexagonPosition: {left: neighbor[0], top: neighbor[1]}});
+              const neighborNeighborNeighbors = [];
+              for (const n of neighborNeighbors) {
+                neighborNeighborNeighbors.push(...getNeighbors({hexagonPosition: {left: n[0], top: n[1]}}));
+              }
+              const neighborNeighborNeighborNeighbors = [];
+              for (const n of neighborNeighborNeighbors) {
+                neighborNeighborNeighborNeighbors.push(...getNeighbors({hexagonPosition: {left: n[0], top: n[1]}}));
+              }
+              if (neighborNeighborNeighborNeighbors.some(n => isAdjacent({hexagonPosition: {left: n[0], top: n[1]}}, end))) {
+                return path;
+              }
+            }
+  
+            const newPath = [...path, neighbor];
+            queue.push(newPath);
+          }
+        }
+      }
+    } else {
+      // if (isAdjacent(currentHexagon, end)) {
+      //   return path;
+      // }
 
-      const neighbors = getNeighbors({ hexagonPosition: { left: currentHexagon[0], top: currentHexagon[1] } });
-      
-      for (const neighbor of neighbors) {
-        const neighborStr = neighbor.toString();
-        const isChampionOccupied = champions.some(c => c.hexagonPosition.left === neighbor[0] && c.hexagonPosition.top === neighbor[1]);
-
-        if (!visited.has(neighborStr) && !isChampionOccupied) {
-          const newPath = [...path, neighbor];
-          queue.push(newPath);
+      if (!visited.has(currentHexagon.toString())) {
+        visited.add(currentHexagon.toString());
+  
+        const neighbors = getNeighbors(currentHexagon);
+        
+        for (const neighbor of neighbors) {
+  
+          const neighborStr = neighbor.toString();
+          const isChampionOccupied = champions.some(c => c.hexagonPosition.left === neighbor[0] && c.hexagonPosition.top === neighbor[1]);
+  
+          if (!visited.has(neighborStr) && !isChampionOccupied) {
+          
+            // Check attack range
+            if (attackRange === 1) {
+              if (isAdjacent(currentHexagon, end)) {
+                return path;
+              }
+            }
+            if (attackRange === 2) {
+              if (isAdjacent({hexagonPosition: {left: neighbor[0], top: neighbor[1]}}, end)) {
+                return path;
+              }
+            } else if (attackRange === 3) {
+              const neighborNeighbors = getNeighbors({hexagonPosition: {left: neighbor[0], top: neighbor[1]}});
+              if (neighborNeighbors.some(n => isAdjacent({hexagonPosition: {left: n[0], top: n[1]}}, end))) {
+                return path; 
+              }
+            } else if (attackRange === 4) {
+              const neighborNeighbors = getNeighbors({hexagonPosition: {left: neighbor[0], top: neighbor[1]}});
+              const neighborNeighborNeighbors = [];
+              for (const n of neighborNeighbors) {
+                neighborNeighborNeighbors.push(...getNeighbors({hexagonPosition: {left: n[0], top: n[1]}})); 
+              }
+              if (neighborNeighborNeighbors.some(n => isAdjacent({hexagonPosition: {left: n[0], top: n[1]}}, end))) {
+                return path;
+              }
+            } else if (attackRange === 5) {
+              const neighborNeighbors = getNeighbors({hexagonPosition: {left: neighbor[0], top: neighbor[1]}});
+              const neighborNeighborNeighbors = [];
+              for (const n of neighborNeighbors) {
+                neighborNeighborNeighbors.push(...getNeighbors({hexagonPosition: {left: n[0], top: n[1]}}));
+              }
+              const neighborNeighborNeighborNeighbors = [];
+              for (const n of neighborNeighborNeighbors) {
+                neighborNeighborNeighborNeighbors.push(...getNeighbors({hexagonPosition: {left: n[0], top: n[1]}}));
+              }
+              if (neighborNeighborNeighborNeighbors.some(n => isAdjacent({hexagonPosition: {left: n[0], top: n[1]}}, end))) {
+                return path;
+              }
+            }
+  
+            const newPath = [...path, neighbor];
+            queue.push(newPath);
+          }
         }
       }
     }
@@ -137,10 +239,9 @@ function findClosestEnemy(userChampion, enemyChampions) {
     const distance = findShortestPath(
       enemyChampions,
       { hexagonPosition: { left: userChampion.hexagonPosition.left, top: userChampion.hexagonPosition.top } },
-      { hexagonPosition: { left: enemyChampion.hexagonPosition.left, top: enemyChampion.hexagonPosition.top } }
+      { hexagonPosition: { left: enemyChampion.hexagonPosition.left, top: enemyChampion.hexagonPosition.top } },
+      userChampion.attackRange
     );
-    console.log(distance);
-
     if (distance && distance.length < minDistance) {
       minDistance = distance.length;
       closestEnemy = enemyChampion;
@@ -156,37 +257,95 @@ function Board({ enemyChampionsList, userChampionsList }) {
   const [userChampions, setUserChampions] = useState(userChampionsList);
   const [draggedPlayer, setDraggedPlayer] = useState(null);
   const [dragStartIndex, setDragStartIndex] = useState(null);
-  const [isCombatActive, setCombatActive] = useState(false);
+  const [isCombatActive, setCombatActive] = useState(0);
 
   const startCombat = () => {
-    setCombatActive(true);
+    setCombatActive(1);
+  }
+
+  const endCombat = () => {
+    setCombatActive(2);
+    console.log("combat ended");
   }
 
   useEffect(() => {
-    if (isCombatActive) {
-      const updatedUserChampions = userChampions.map(userChampion => {
-        const closestEnemy = findClosestEnemy(userChampion, enemyChampions);
+    if (isCombatActive === 1) {
+      const allChampions = userChampions.concat(enemyChampions);
+      // console.log('before champions', allChampions);
+  
+      const updateChampionAtIndex = async (index) => {
+        const champion = allChampions[index];
+        const isUserChampion = champion.team === 'user';
+        const closestEnemy = isUserChampion ? findClosestEnemy(champion, enemyChampions) : findClosestEnemy(champion, userChampions);
+  
         if (closestEnemy) {
-          const shortestPath = findShortestPath(userChampions, userChampion.hexagonPosition, closestEnemy.hexagonPosition);
-          // Animate the movement along the path (you may need to implement animation logic)
-          // For simplicity, we will update the position directly without animation
+          const shortestPath = findShortestPath(allChampions, champion, closestEnemy, champion.attackRange);
+          // console.log('shortest path', shortestPath);
+  
           if (shortestPath && shortestPath.length > 1) {
-            const targetHexagon = shortestPath[1]; // The next hexagon in the path
-            const targetPixelLeft = convertToPixels(targetHexagon[0], 'left', targetHexagon[1] % 2 === 1);
-            const targetPixelTop = convertToPixels(targetHexagon[1], 'top', targetHexagon[1] % 2 === 1);
-            return {
-              ...userChampion,
+            const targetHexagon = shortestPath[1];
+            const targetPixelLeft = convertToPixels(targetHexagon[0], 'left', targetHexagon[1] % 2 === 1) - 25;
+            const targetPixelTop = convertToPixels(targetHexagon[1], 'top', targetHexagon[1] % 2 === 1) - 25;
+  
+            allChampions[index] = {
+              ...champion,
               hexagonPosition: { left: targetHexagon[0], top: targetHexagon[1] },
               currentPosition: { left: targetPixelLeft, top: targetPixelTop },
             };
+  
+            // console.log('updated champion', allChampions[index]);
+          } else {
+            allChampions[closestEnemy.index] = { ...closestEnemy, health: closestEnemy.health -= champion.attackDamage };
+
+            if ((closestEnemy.health - champion.attackDamage) <= 0) {
+              allChampions[closestEnemy.index] = { ...closestEnemy, alive: false };
+            }
           }
         }
-        return userChampion;
-      });
+      };
+  
+      const updateChampionsSequentially = async () => {
+        for (let index = 0; index < allChampions.length; index++) {
+          await new Promise(resolve => setTimeout(resolve, 500)); // half-second pause
+          await updateChampionAtIndex(index);
+        }
+  
+        // console.log('after champions', allChampions);
 
-      setUserChampions(updatedUserChampions);
+        const aliveChampions = allChampions.filter(x => x.alive); 
+
+        const updatedUserChampions = [];
+        const updatedEnemyChampions = [];
+        var iteration = 0;
+
+        aliveChampions.forEach(champion => {
+          if (champion.team === 'user') {
+            champion = {
+              ...champion, index: iteration
+            };
+            updatedUserChampions.push(champion);
+          } else {
+            champion = {
+              ...champion, index: iteration
+            };
+            updatedEnemyChampions.push(champion);
+          }
+          iteration += 1;
+        });
+  
+        setUserChampions(updatedUserChampions);
+        setEnemyChampions(updatedEnemyChampions);
+
+        if (updatedUserChampions.length === 0) {
+          endCombat();
+        } else if (updatedEnemyChampions.length === 0) {
+          endCombat();
+        }
+      };
+  
+      updateChampionsSequentially();
     }
-  }, [userChampions, isCombatActive]);
+  }, [userChampions, isCombatActive, enemyChampions]);
 
   const areChampionsOverlapping = (champion1, champion2) => {
     const dx = champion1.currentPosition.left - champion2.currentPosition.left;
@@ -248,7 +407,7 @@ function Board({ enemyChampionsList, userChampionsList }) {
     if (draggedPlayer === 'enemy') {
       return;
     }
-    if (isCombatActive) {
+    if (isCombatActive !== 0) {
       event.preventDefault();
       return;
     }
@@ -303,7 +462,7 @@ function Board({ enemyChampionsList, userChampionsList }) {
     if (draggedPlayer === 'enemy') {
       return;
     }
-    if (isCombatActive) {
+    if (isCombatActive !== 0) {
       event.preventDefault();
       return;
     }
@@ -349,9 +508,6 @@ function Board({ enemyChampionsList, userChampionsList }) {
     }
   };
 
-  console.log(isCombatActive);
-  console.log(userChampions);
-
   return (
       <div>
         <div className='hex-row'>
@@ -369,6 +525,7 @@ function Board({ enemyChampionsList, userChampionsList }) {
               <Champion
                 key={index}
                 team={'enemy'}
+                index={champion.index}
                 hexagonPosition={champion.hexagonPosition}
                 currentPosition={champion.currentPosition}
                 image={champion.image}
@@ -376,6 +533,10 @@ function Board({ enemyChampionsList, userChampionsList }) {
                 starLevel={champion.starLevel}
                 headliner={champion.headliner}
                 items={champion.items}
+                alive={champion.alive}
+                attackRange={champion.attackRange}
+                health={champion.health}
+                attackDamage={champion.attackDamage}
               ></Champion>
             </div>
           ))}
@@ -456,6 +617,7 @@ function Board({ enemyChampionsList, userChampionsList }) {
               <Champion
                 key={index}
                 team={'user'}
+                index={champion.index}
                 hexagonPosition={champion.hexagonPosition}
                 currentPosition={champion.currentPosition}
                 image={champion.image}
@@ -463,6 +625,10 @@ function Board({ enemyChampionsList, userChampionsList }) {
                 starLevel={champion.starLevel}
                 headliner={champion.headliner}
                 items={champion.items}
+                alive={champion.alive}
+                attackRange={champion.attackRange}
+                health={champion.health}
+                attackDamage={champion.attackDamage}
               ></Champion>
             </div>
           ))}

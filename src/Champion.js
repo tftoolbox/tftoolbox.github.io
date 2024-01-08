@@ -1,7 +1,25 @@
 import React from 'react';
 import './Champion.css'; 
 
-function Champion({ key, team, hexagonPosition, currentPosition, image, type, starLevel, headliner, items }) {
+function Champion({ key, team, index, hexagonPosition, currentPosition, image, type, starLevel, headliner, items, alive, attackRange, health, attackDamage }) {
+  const healthTextStyle = {
+    color: team === 'enemy' ? 'red' : 'lightgreen',
+    fontSize: '12px', 
+  };
+
+  const starStyle = {
+    color: 'yellow',
+    fontSize: '16px',  
+  };
+
+  const renderStars = () => {
+    const stars = [];
+    for (let i = 0; i < starLevel; i++) {
+      stars.push(<span key={i} style={starStyle}>★</span>);
+    }
+    return stars;
+  };
+
   return (
     <div
       className={"champion"}
@@ -11,7 +29,14 @@ function Champion({ key, team, hexagonPosition, currentPosition, image, type, st
         backgroundImage: `url(${image})`,
         backgroundSize: 'cover', 
       }}
-    ></div>
+    >
+      <div className="health-overlay">
+        <span className="health-text" style={healthTextStyle}>{health}</span>
+      </div>
+      <div className="star-overlay">
+        {renderStars()}
+      </div>
+    </div>
   );
 }
 
