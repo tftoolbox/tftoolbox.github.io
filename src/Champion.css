@@ -9,7 +9,16 @@
 .health-overlay {
   position: absolute;
   width: 100%;
-  bottom: 0;
+  bottom: 40;
+  text-align: center;
+  background-color: rgba(0, 0, 0, 0.7); 
+  border-radius: 5px;
+}
+
+.mana-overlay {
+  position: absolute;
+  width: 100%;
+  bottom: 00;
   text-align: center;
   background-color: rgba(0, 0, 0, 0.7); 
   border-radius: 5px;

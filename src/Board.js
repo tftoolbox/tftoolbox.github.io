@@ -265,7 +265,7 @@ function Board({ enemyChampionsList, userChampionsList }) {
 
   const endCombat = () => {
     setCombatActive(2);
-    console.log("combat ended");
+    // console.log("combat ended");
   }
 
   useEffect(() => {
@@ -295,10 +295,31 @@ function Board({ enemyChampionsList, userChampionsList }) {
   
             // console.log('updated champion', allChampions[index]);
           } else {
-            allChampions[closestEnemy.index] = { ...closestEnemy, health: closestEnemy.health -= champion.attackDamage };
+            if (champion.totalMana === null | champion.mana < champion.totalMana) {
+              const postMitigationAttackDamage = (1 - (closestEnemy.armor / (100 + closestEnemy.armor))) * champion.attackDamage;
+              const manaIncrement = Math.min(42.5, (0.01 * champion.attackDamage) + (0.07 * postMitigationAttackDamage))
+              var newCurrentMana = Math.min(closestEnemy.totalMana, closestEnemy.mana + manaIncrement)
+              allChampions[closestEnemy.index] = { ...closestEnemy, health: closestEnemy.health -= postMitigationAttackDamage, mana: newCurrentMana };
 
-            if ((closestEnemy.health - champion.attackDamage) <= 0) {
-              allChampions[closestEnemy.index] = { ...closestEnemy, alive: false };
+              if ((closestEnemy.health - postMitigationAttackDamage) <= 0) {
+                allChampions[closestEnemy.index] = { ...closestEnemy, alive: false };
+              }
+
+              newCurrentMana = Math.min(champion.totalMana, champion.mana + 10);
+
+              allChampions[index] = { ...champion, mana: newCurrentMana };
+
+            } else if (champion.mana >= champion.totalMana) {
+              const postMitigationAbilityDamage = (1 - (closestEnemy.magicResist / (100 + closestEnemy.magicResist))) * champion.abilityPower;
+              const manaIncrement = Math.min(42.5, (0.01 * champion.attackDamage) + (0.07 * postMitigationAbilityDamage))
+              const newCurrentMana = Math.min(closestEnemy.totalMana, closestEnemy.mana + manaIncrement)
+              allChampions[closestEnemy.index] = { ...closestEnemy, health: closestEnemy.health -= postMitigationAbilityDamage, mana: newCurrentMana };
+
+              if ((closestEnemy.health - postMitigationAbilityDamage) <= 0) {
+                allChampions[closestEnemy.index] = { ...closestEnemy, alive: false };
+              }
+
+              allChampions[index] = { ...champion, mana: 0 };
             }
           }
         }
@@ -537,6 +558,11 @@ function Board({ enemyChampionsList, userChampionsList }) {
                 attackRange={champion.attackRange}
                 health={champion.health}
                 attackDamage={champion.attackDamage}
+                totalMana={champion.totalMana}
+                mana={champion.mana}
+                abilityPower={champion.abilityPower}
+                armor={champion.armor}
+                magicResist={champion.magicResist}
               ></Champion>
             </div>
           ))}
@@ -629,6 +655,11 @@ function Board({ enemyChampionsList, userChampionsList }) {
                 attackRange={champion.attackRange}
                 health={champion.health}
                 attackDamage={champion.attackDamage}
+                totalMana={champion.totalMana}
+                mana={champion.mana}
+                abilityPower={champion.abilityPower}
+                armor={champion.armor}
+                magicResist={champion.magicResist}
               ></Champion>
             </div>
           ))}
