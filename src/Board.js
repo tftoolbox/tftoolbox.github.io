@@ -4,6 +4,8 @@ import Hexagon from './Hexagon';
 import Champion from './Champion';
 
 const CIRCLE_DIAMETER = 50;
+const ITERATION_CYCLE = 50;
+var globalIteration = 0;
 
 const adjacentHexagons = {
   0: { 
@@ -258,6 +260,7 @@ function Board({ enemyChampionsList, userChampionsList }) {
   const [draggedPlayer, setDraggedPlayer] = useState(null);
   const [dragStartIndex, setDragStartIndex] = useState(null);
   const [isCombatActive, setCombatActive] = useState(0);
+  // const [combatIteration, setCombatIteration] = useState(0); // will implement later for overtime
 
   const startCombat = () => {
     setCombatActive(1);
@@ -274,63 +277,121 @@ function Board({ enemyChampionsList, userChampionsList }) {
       // console.log('before champions', allChampions);
   
       const updateChampionAtIndex = async (index) => {
+        const tempChampion = allChampions[index];
+        var allChampionsProjectileIteration = 0;
+        const allProjectiles = tempChampion.projectiles;
+        if (allProjectiles !== undefined & allProjectiles !== null & allProjectiles !== 0) {
+          for (const projectile of allProjectiles) {
+            if (projectile.iterations === 0) {
+              if ((allChampions[index].health - projectile.damage) <= 0) {
+                const newProjectiles = allChampions[index].projectiles.filter((_, index) => index !== allChampionsProjectileIteration);
+                allChampions[index] = { ...allChampions[index], alive: false, projectiles: newProjectiles };
+                console.log(`${tempChampion.type} of ${tempChampion.team} took ${projectile.damage} damage and died.`);
+                break;
+              } else {
+                const newHealth = allChampions[index].health - projectile.damage;
+                console.log(`${tempChampion.type} of ${tempChampion.team} took ${projectile.damage} damage.`);
+                if (tempChampion.mana === null) {
+                  const newProjectiles = allChampions[index].projectiles.filter((_, index) => index !== allChampionsProjectileIteration);
+                  allChampions[index] = { ...allChampions[index], health: newHealth, projectiles: newProjectiles };
+                } else {
+                  const newCurrentMana = Math.min(allChampions[index].totalMana, allChampions[index].mana + projectile.mana);
+                  const newProjectiles = allChampions[index].projectiles.filter((_, index) => index !== allChampionsProjectileIteration);
+                  allChampions[index] = { ...allChampions[index], health: newHealth, mana: newCurrentMana, projectiles: newProjectiles };
+                } 
+              }
+            } else {
+              var newProjectiles = allChampions[index].projectiles;
+              const newProjectileIterations = projectile.iterations - 1;
+              newProjectiles[allChampionsProjectileIteration] = { ...projectile, iterations: newProjectileIterations }
+              allChampions[index] = { ...allChampions[index], projectiles: newProjectiles };
+              allChampionsProjectileIteration += 1;
+            }
+          }
+        }
         const champion = allChampions[index];
-        const isUserChampion = champion.team === 'user';
-        const closestEnemy = isUserChampion ? findClosestEnemy(champion, enemyChampions) : findClosestEnemy(champion, userChampions);
-  
-        if (closestEnemy) {
-          const shortestPath = findShortestPath(allChampions, champion, closestEnemy, champion.attackRange);
-          // console.log('shortest path', shortestPath);
-  
-          if (shortestPath && shortestPath.length > 1) {
-            const targetHexagon = shortestPath[1];
-            const targetPixelLeft = convertToPixels(targetHexagon[0], 'left', targetHexagon[1] % 2 === 1) - 25;
-            const targetPixelTop = convertToPixels(targetHexagon[1], 'top', targetHexagon[1] % 2 === 1) - 25;
-  
-            allChampions[index] = {
-              ...champion,
-              hexagonPosition: { left: targetHexagon[0], top: targetHexagon[1] },
-              currentPosition: { left: targetPixelLeft, top: targetPixelTop },
-            };
-  
-            // console.log('updated champion', allChampions[index]);
-          } else {
-            if (champion.totalMana === null | champion.mana < champion.totalMana) {
-              const postMitigationAttackDamage = (1 - (closestEnemy.armor / (100 + closestEnemy.armor))) * champion.attackDamage;
-              const manaIncrement = Math.min(42.5, (0.01 * champion.attackDamage) + (0.07 * postMitigationAttackDamage))
-              var newCurrentMana = Math.min(closestEnemy.totalMana, closestEnemy.mana + manaIncrement)
-              allChampions[closestEnemy.index] = { ...closestEnemy, health: closestEnemy.health -= postMitigationAttackDamage, mana: newCurrentMana };
 
-              if ((closestEnemy.health - postMitigationAttackDamage) <= 0) {
-                allChampions[closestEnemy.index] = { ...closestEnemy, alive: false };
+        if (allChampions[index].alive) {
+          const isUserChampion = champion.team === 'user';
+          const closestEnemy = isUserChampion ? findClosestEnemy(champion, enemyChampions) : findClosestEnemy(champion, userChampions);
+    
+          if (closestEnemy) {
+            const shortestPath = findShortestPath(allChampions, champion, closestEnemy, champion.attackRange);
+            // console.log('shortest path', shortestPath);
+    
+            if (shortestPath && shortestPath.length > 1) {
+              const targetHexagon = shortestPath[1];
+              const targetPixelLeft = convertToPixels(targetHexagon[0], 'left', targetHexagon[1] % 2 === 1) - 25;
+              const targetPixelTop = convertToPixels(targetHexagon[1], 'top', targetHexagon[1] % 2 === 1) - 25;
+    
+              if (champion.iterationsRemaining.move === 0) {
+                const newIterationsRemaining = { ...champion.iterationsRemaining, move: champion.movementSpeed };
+                allChampions[index] = {
+                  ...champion,
+                  hexagonPosition: { left: targetHexagon[0], top: targetHexagon[1] },
+                  currentPosition: { left: targetPixelLeft, top: targetPixelTop },
+                  iterationsRemaining: newIterationsRemaining, 
+                };
+                console.log(`${champion.type} of ${champion.team} moved.`);
+              } else {
+                const newIterationsRemaining = { ...champion.iterationsRemaining, move: champion.iterationsRemaining.move - 1 };
+                allChampions[index] = {
+                  ...champion,
+                  iterationsRemaining: newIterationsRemaining, 
+                };
               }
+    
+              // console.log('updated champion', allChampions[index]);
+            } else {
+              if (champion.totalMana === null | champion.mana < champion.totalMana) {
+                if (champion.iterationsRemaining.attack === 0) {
+                  const postMitigationAttackDamage = (1 - (closestEnemy.armor / (100 + closestEnemy.armor))) * champion.attackDamage;
+                  const manaIncrement = Math.min(42.5, (0.01 * champion.attackDamage) + (0.07 * postMitigationAttackDamage))
+                  var newCurrentMana = Math.min(closestEnemy.totalMana, closestEnemy.mana + manaIncrement)
+                  const newProjectile = { damage: postMitigationAttackDamage, mana: newCurrentMana, iterations: champion.attackProjectileSpeed }
+                  const newProjectileList = [...closestEnemy.projectiles, newProjectile];
+                  allChampions[closestEnemy.index] = { ...closestEnemy, projectiles: newProjectileList };
 
-              newCurrentMana = Math.min(champion.totalMana, champion.mana + 10);
+                  newCurrentMana = Math.min(champion.totalMana, champion.mana + 10);
+                  const newIterationsRemaining = { ...champion.iterationsRemaining, attack: champion.attackSpeed };
+                  allChampions[index] = { ...champion, mana: newCurrentMana, iterationsRemaining: newIterationsRemaining };
+                  console.log(`${champion.type} of ${champion.team} fired an attack to ${closestEnemy.type}.`);
+                } else {
+                  const newIterationsRemaining = { ...champion.iterationsRemaining, attack: champion.iterationsRemaining.attack - 1 };
+                  allChampions[index] = {
+                    ...champion,
+                    iterationsRemaining: newIterationsRemaining, 
+                  };
+                }
+              } else if (champion.mana >= champion.totalMana) {
+                if (champion.iterationsRemaining.ability === 0) {
+                  const postMitigationAbilityDamage = (1 - (closestEnemy.magicResist / (100 + closestEnemy.magicResist))) * champion.abilityPower;
+                  const manaIncrement = Math.min(42.5, (0.01 * champion.attackDamage) + (0.07 * postMitigationAbilityDamage))
+                  const newCurrentMana = Math.min(closestEnemy.totalMana, closestEnemy.mana + manaIncrement)
+                  const newProjectile = { damage: postMitigationAbilityDamage, mana: newCurrentMana, iterations: champion.abilityProjectileSpeed }
+                  const newProjectileList = [...closestEnemy.projectiles, newProjectile];
+                  allChampions[closestEnemy.index] = { ...closestEnemy, projectiles: newProjectileList };
 
-              allChampions[index] = { ...champion, mana: newCurrentMana };
-
-            } else if (champion.mana >= champion.totalMana) {
-              const postMitigationAbilityDamage = (1 - (closestEnemy.magicResist / (100 + closestEnemy.magicResist))) * champion.abilityPower;
-              const manaIncrement = Math.min(42.5, (0.01 * champion.attackDamage) + (0.07 * postMitigationAbilityDamage))
-              const newCurrentMana = Math.min(closestEnemy.totalMana, closestEnemy.mana + manaIncrement)
-              allChampions[closestEnemy.index] = { ...closestEnemy, health: closestEnemy.health -= postMitigationAbilityDamage, mana: newCurrentMana };
-
-              if ((closestEnemy.health - postMitigationAbilityDamage) <= 0) {
-                allChampions[closestEnemy.index] = { ...closestEnemy, alive: false };
+                  const newIterationsRemaining = { ...champion.iterationsRemaining, ability: champion.abilityCastTime };
+                  allChampions[index] = { ...champion, mana: 0, iterationsRemaining: newIterationsRemaining };
+                  console.log(`${champion.type} of ${champion.team} fired an ability to ${closestEnemy.type}.`);
+                } else {  
+                  const newIterationsRemaining = { ...champion.iterationsRemaining, ability: champion.iterationsRemaining.ability - 1 };
+                  allChampions[index] = {
+                    ...champion,
+                    iterationsRemaining: newIterationsRemaining, 
+                  };
+                }
               }
-
-              allChampions[index] = { ...champion, mana: 0 };
             }
           }
         }
       };
   
-      const updateChampionsSequentially = async () => {
+      const updateChampionsSequentially = async (startTime) => {
         for (let index = 0; index < allChampions.length; index++) {
-          await new Promise(resolve => setTimeout(resolve, 500)); // half-second pause
           await updateChampionAtIndex(index);
         }
-  
         // console.log('after champions', allChampions);
 
         const aliveChampions = allChampions.filter(x => x.alive); 
@@ -353,7 +414,17 @@ function Board({ enemyChampionsList, userChampionsList }) {
           }
           iteration += 1;
         });
-  
+        
+        const endTime = new Date();
+        const timeDifference = endTime - startTime;
+        const waitTime = ITERATION_CYCLE - timeDifference;
+        if (waitTime >= 0) {
+          await new Promise(resolve => setTimeout(resolve, waitTime));    
+          console.log(`${globalIteration} Complete w/ ${waitTime + timeDifference} ms.`);
+        } else {
+          console.log('ERROR! ITERATION CYCLE TIME NOT LONG ENOUGH!');
+        }
+
         setUserChampions(updatedUserChampions);
         setEnemyChampions(updatedEnemyChampions);
 
@@ -363,8 +434,10 @@ function Board({ enemyChampionsList, userChampionsList }) {
           endCombat();
         }
       };
-  
-      updateChampionsSequentially();
+      
+      const startTime = new Date();
+      updateChampionsSequentially(startTime);
+      globalIteration += 1;
     }
   }, [userChampions, isCombatActive, enemyChampions]);
 
@@ -563,6 +636,14 @@ function Board({ enemyChampionsList, userChampionsList }) {
                 abilityPower={champion.abilityPower}
                 armor={champion.armor}
                 magicResist={champion.magicResist}
+                castingAttack={champion.castingAttack}
+                castingAbility={champion.castingAbility}
+                projectiles={champion.projectiles}
+                abilityCastTime={champion.abilityCastTime}
+                movementSpeed={champion.movementSpeed}
+                iterationsRemaining={champion.iterationsRemaining}
+                attackProjectileSpeed={champion.attackProjectileSpeed}
+                abilityProjectileSpeed={champion.abilityProjectileSpeed}
               ></Champion>
             </div>
           ))}
@@ -660,6 +741,14 @@ function Board({ enemyChampionsList, userChampionsList }) {
                 abilityPower={champion.abilityPower}
                 armor={champion.armor}
                 magicResist={champion.magicResist}
+                castingAttack={champion.castingAttack}
+                castingAbility={champion.castingAbility}
+                projectiles={champion.projectiles}
+                abilityCastTime={champion.abilityCastTime}
+                movementSpeed={champion.movementSpeed}
+                iterationsRemaining={champion.iterationsRemaining}
+                attackProjectileSpeed={champion.attackProjectileSpeed}
+                abilityProjectileSpeed={champion.abilityProjectileSpeed}
               ></Champion>
             </div>
           ))}
