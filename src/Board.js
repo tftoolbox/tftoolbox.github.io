@@ -290,6 +290,13 @@ function Board({ enemyChampionsList, userChampionsList }) {
                 break;
               } else {
                 const newHealth = allChampions[index].health - projectile.damage;
+                // if (projectile.effect !== null & projectile.effect.length !== 0) {
+                //   for (const effect in projectile.effect) {
+                //     if (effect.type === 'shred') {
+                      
+                //     }
+                //   }
+                // }
                 console.log(`${tempChampion.type} of ${tempChampion.team} took ${projectile.damage} damage.`);
                 if (tempChampion.mana === null) {
                   const newProjectiles = allChampions[index].projectiles.filter((_, index) => index !== allChampionsProjectileIteration);
@@ -348,7 +355,7 @@ function Board({ enemyChampionsList, userChampionsList }) {
                   const postMitigationAttackDamage = (1 - (closestEnemy.armor / (100 + closestEnemy.armor))) * champion.attackDamage;
                   const manaIncrement = Math.min(42.5, (0.01 * champion.attackDamage) + (0.07 * postMitigationAttackDamage))
                   var newCurrentMana = Math.min(closestEnemy.totalMana, closestEnemy.mana + manaIncrement)
-                  const newProjectile = { damage: postMitigationAttackDamage, mana: newCurrentMana, iterations: champion.attackProjectileSpeed }
+                  const newProjectile = { damage: postMitigationAttackDamage, mana: newCurrentMana, iterations: champion.attackProjectileSpeed, effect: [] }
                   const newProjectileList = [...closestEnemy.projectiles, newProjectile];
                   allChampions[closestEnemy.index] = { ...closestEnemy, projectiles: newProjectileList };
 
@@ -368,7 +375,7 @@ function Board({ enemyChampionsList, userChampionsList }) {
                   const postMitigationAbilityDamage = (1 - (closestEnemy.magicResist / (100 + closestEnemy.magicResist))) * champion.abilityPower;
                   const manaIncrement = Math.min(42.5, (0.01 * champion.attackDamage) + (0.07 * postMitigationAbilityDamage))
                   const newCurrentMana = Math.min(closestEnemy.totalMana, closestEnemy.mana + manaIncrement)
-                  const newProjectile = { damage: postMitigationAbilityDamage, mana: newCurrentMana, iterations: champion.abilityProjectileSpeed }
+                  const newProjectile = { damage: postMitigationAbilityDamage, mana: newCurrentMana, iterations: champion.abilityProjectileSpeed, effect: [{ type: 'shred', iterations: 60, strength: 0.3 }] }
                   const newProjectileList = [...closestEnemy.projectiles, newProjectile];
                   allChampions[closestEnemy.index] = { ...closestEnemy, projectiles: newProjectileList };
 
