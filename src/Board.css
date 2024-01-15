@@ -1,8 +1,11 @@
 .hex-row {
   clear: left;
+  flex-direction: row;
+  margin-left: 143.328px
 }
 .hex-row.even {
-  margin-left: 32.7px;
+  margin-left: 176.028px;
+  flex-direction: row;
 }
 
 .circle-overlay {
@@ -11,4 +14,91 @@
   height: 50px;
   border-radius: 50%;
   z-index: 1;
+}
+
+.section {
+  display: flex;
+  padding: 15px; 
+  background-color: #1E3852;
+  border-radius: 8px; 
+}
+
+.right-section {
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  width: 17.5%;
+  max-width: 17.5%;
+  margin-left: 1.25%;
+  margin-right: 1.25%;
+}
+
+.center-section {
+  flex-direction: column;
+  width: 60%;
+  justify-content: center;
+}
+
+.left-section {
+  flex-direction: column;
+  align-items: center;
+  width: 17.5%;
+  max-width: 17.5%;
+  margin-left: 1.25%;
+  margin-right: 1.25%;
+}
+
+.trait-section {
+  display: flex;
+  flex-direction: column;
+  width: 225px;
+}
+
+.trait-row {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly;
+  align-items: center;
+}
+
+.hexagon-trait {
+  float: left;
+  margin-left: 2.25px;
+  margin-bottom: -11.7px;
+  padding-top: 10px;
+  padding-bottom: 17.5px;
+}
+
+.hexagon-trait .start {
+  width: 0;
+  border-left: 23.4px solid transparent;
+  border-right: 23.4px solid transparent;
+}
+
+.hexagon-trait .center {
+  width: 46.8px;
+  height: 27px;
+  position: relative;
+  color: #ffffff;
+  font-size: 14px;
+}
+
+.hexagon-trait .end {
+  width: 0;
+  border-left: 23.4px solid transparent;
+  border-right: 23.4px solid transparent;
+}
+
+.single-trait {
+  display: flex;
+  flex-direction: row;
+}
+
+.augment-section {
+  display: flex;
+  flex-direction: row;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  justify-content: space-evenly;
+  width: 225px;
 }

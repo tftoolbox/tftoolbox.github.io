@@ -7,9 +7,9 @@ import Champion from './Champion';
 const convertToPixels = (coordinate, leftOrTop, even) => {
   if (leftOrTop === 'left') {
     if (even) {
-      return 32.7 + ((coordinate + 1) * 2.95) + (coordinate * 62.4) + 62.4 / 2;
+      return 360 + 32.7 + ((coordinate + 1) * 2.95) + (coordinate * 62.4) + 62.4 / 2;
     }
-    return ((coordinate + 1) * 2.95) + (coordinate * 62.4) + 62.4 / 2;
+    return 360 + ((coordinate + 1) * 2.95) + (coordinate * 62.4) + 62.4 / 2;
   }
   if (leftOrTop === 'top') {
     return (coordinate * 20.3) + (coordinate * 36) + 36;
