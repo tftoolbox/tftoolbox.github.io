@@ -264,6 +264,7 @@ function Board({ enemyChampionsList, userChampionsList }) {
   const [draggedPlayer, setDraggedPlayer] = useState(null);
   const [dragStartIndex, setDragStartIndex] = useState(null);
   const [isCombatActive, setCombatActive] = useState(0);
+  const [selectedChampion, setSelectedChampion] = useState(userChampionsList[0]);
   // const [combatIteration, setCombatIteration] = useState(0); // will implement later for overtime
 
   const startCombat = () => {
@@ -463,6 +464,7 @@ function Board({ enemyChampionsList, userChampionsList }) {
   const handleCircleDragStart = (event, player, index) => {
     if (player === 'enemy') {
       event.preventDefault(); // prevent dragging for enemy circles
+      setSelectedChampion(enemyChampions[index])
       return;
     }
 
@@ -470,6 +472,7 @@ function Board({ enemyChampionsList, userChampionsList }) {
     setDragging(true);
     setDraggedPlayer(player);
     setDragStartIndex(index);
+    setSelectedChampion(userChampions[index]);
   };
 
   const handleCircleDragEnd = () => {
@@ -486,24 +489,24 @@ function Board({ enemyChampionsList, userChampionsList }) {
   const convertToPixels = (coordinate, leftOrTop, even) => {
     if (leftOrTop === 'left') {
       if (even) {
-        return 360 + 32.7 + ((coordinate + 1) * 2.95) + (coordinate * 62.4) + 62.4 / 2;
+        return 459.75 + 32.7 + ((coordinate + 1) * 2.95) + (coordinate * 62.4) + 62.4 / 2;
       }
-      return 360 + ((coordinate + 1) * 2.95) + (coordinate * 62.4) + 62.4 / 2;
+      return 459.75 + ((coordinate + 1) * 2.95) + (coordinate * 62.4) + 62.4 / 2;
     }
     if (leftOrTop === 'top') {
-      return (coordinate * 20.3) + (coordinate * 36) + 36;
+      return (coordinate * 20.3) + (coordinate * 36) + 36 + 173.11;
     }
   }
 
   const convertToHexagons = (coordinate, leftOrTop, even) => {
     if (leftOrTop === 'left') {
       if (even) {
-        return Math.floor((coordinate - 32.7 - 360 - 2.95 - 31.2) / (2.95 + 62.4));
+        return Math.floor((coordinate - 32.7 - 459.75 - 2.95 - 31.2) / (2.95 + 62.4));
       }
-      return Math.floor((coordinate - 2.95 - 31.2 - 360) / (2.95 + 62.4));
+      return Math.floor((coordinate - 2.95 - 31.2 - 459.75) / (2.95 + 62.4));
     }
     if (leftOrTop === 'top') {
-      return Math.floor((coordinate - 36) / (20.3 + 36));
+      return Math.floor((coordinate - 36 - 173.11) / (20.3 + 36));
     }
   }
 
@@ -784,7 +787,7 @@ function Board({ enemyChampionsList, userChampionsList }) {
           </div>
         </div>
         <div className='section right-section'>
-          <ChampionDisplay />
+          <ChampionDisplay champion={selectedChampion} />
           <div style={{ display: 'flex', width: '225px', height: '50px', marginBottom: '10px' }}>
             <button
               style={{
