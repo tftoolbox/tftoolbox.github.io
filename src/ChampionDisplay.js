@@ -20,9 +20,6 @@ const ChampionDisplay = (champion) => {
         {currentChampion.starLevel === 3 && (
           <span style={{ color: 'yellow' }}>★ ★ ★</span>
         )}
-        {currentChampion.starLevel !== 1 && currentChampion.starLevel !== 2 && currentChampion.starLevel !== 3 && (
-          <span style={{ color: 'red' }}>Invalid star level</span>
-        )}
       </div>
       <div style={{ paddingLeft: '10px', paddingTop: '15px', paddingRight: '10px', paddingBottom: '5px' }}>
         <img src={currentChampion.image} alt={currentChampion.type} style={{ width: '100%', borderRadius: '8px' }} />
