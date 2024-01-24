@@ -39,6 +39,8 @@ function App() {
     movementSpeed: 30, iterationsRemaining: { attack: 21, ability: 15, move: 30 }, attackProjectileSpeed: 5, abilityProjectileSpeed: 5, stats: [], criticalChance: 0.25, criticalDamage: 1.40 },
   ];
 
+  // Add in functionality for different abilities and champions
+
   return (
     <div className="App">
       <Board enemyChampionsList={enemyChampions} userChampionsList={userChampions} />
