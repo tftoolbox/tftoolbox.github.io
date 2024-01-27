@@ -6,9 +6,10 @@ import DualButton from './DualButton';
 import Traits from './Traits';
 import Augments from './Augments';
 import ChampionDisplay from './ChampionDisplay';
+import { puzzlesList, Puzzles } from './Puzzles';
 
 const CIRCLE_DIAMETER = 50;
-const ITERATION_CYCLE = 50;
+const ITERATION_CYCLE = 25;
 var globalIteration = 0;
 
 const adjacentHexagons = {
@@ -257,7 +258,7 @@ function findClosestEnemy(userChampion, enemyChampions) {
   return closestEnemy;
 }
 
-function Board({ enemyChampionsList, userChampionsList }) {
+function Board({ enemyChampionsList, userChampionsList, initialPuzzleNumber }) {
   const [isDragging, setDragging] = useState(false);
   const [enemyChampions, setEnemyChampions] = useState(enemyChampionsList);
   const [userChampions, setUserChampions] = useState(userChampionsList);
@@ -265,7 +266,29 @@ function Board({ enemyChampionsList, userChampionsList }) {
   const [dragStartIndex, setDragStartIndex] = useState(null);
   const [isCombatActive, setCombatActive] = useState(0);
   const [selectedChampion, setSelectedChampion] = useState(userChampionsList[0]);
+  const [puzzleNumber, setPuzzleNumber] = useState(initialPuzzleNumber);
   // const [combatIteration, setCombatIteration] = useState(0); // will implement later for overtime
+
+  function getRandomInt(max) {
+    return Math.floor(Math.random() * max);
+  }
+
+  const handleNextPuzzleClick = (e) => {
+    e.preventDefault();
+    setCombatActive(0);
+    let newPuzzleNumber;
+
+    do {
+      newPuzzleNumber = getRandomInt(puzzlesList.length);
+    } while (newPuzzleNumber === puzzleNumber);
+
+    console.log('New Puzzle Number: ', puzzleNumber);
+
+    setPuzzleNumber(newPuzzleNumber);
+    const newChampions = Puzzles(newPuzzleNumber);
+    setEnemyChampions(newChampions[0]);
+    setUserChampions(newChampions[1]);
+  };
 
   const startCombat = () => {
     setCombatActive(1);
@@ -356,7 +379,7 @@ function Board({ enemyChampionsList, userChampionsList }) {
     
               // console.log('updated champion', allChampions[index]);
             } else {
-              if (champion.totalMana === null | champion.mana < champion.totalMana) {
+              if (champion.totalMana === 0 | champion.mana < champion.totalMana) {
                 if (champion.iterationsRemaining.attack === 0) {
                   const postMitigationAttackDamage = (1 - (closestEnemy.armor / (100 + closestEnemy.armor))) * champion.attackDamage;
                   const manaIncrement = Math.min(42.5, (0.01 * champion.attackDamage) + (0.07 * postMitigationAttackDamage))
@@ -405,7 +428,7 @@ function Board({ enemyChampionsList, userChampionsList }) {
         for (let index = 0; index < allChampions.length; index++) {
           await updateChampionAtIndex(index);
         }
-        // console.log('after champions', allChampions);
+        console.log('after champions', allChampions);
 
         const aliveChampions = allChampions.filter(x => x.alive); 
 
@@ -627,6 +650,20 @@ function Board({ enemyChampionsList, userChampionsList }) {
           <Augments />
         </div>
         <div className='section center-section'>
+          {isCombatActive === 2 && (
+            <div className="overlay">
+              {userChampions.length > 0 && (
+                <div className="result-message win">
+                  You Win!
+                </div>
+              )}
+              {enemyChampions.length > 0 && (
+                <div className="result-message lose">
+                  You Lose!
+                </div>
+              )}
+            </div>
+          )}
           <div className='hex-row'>
             {enemyChampions.map((champion, index) => (
               <div
@@ -789,20 +826,40 @@ function Board({ enemyChampionsList, userChampionsList }) {
         <div className='section right-section'>
           <ChampionDisplay champion={selectedChampion} />
           <div style={{ display: 'flex', width: '225px', height: '50px', marginBottom: '10px' }}>
-            <button
-              style={{
-                flex: '1',
-                padding: '10px',
-                borderRadius: '15px',
-                backgroundColor: '#4CAF50',  
-                color: '#ffffff',
-                fontSize: '16px',
-                fontWeight: 'bold',
-              }}
-              onClick={startCombat}
-            >
-              Submit
-            </button>
+            {isCombatActive !== 2 && (
+              <button
+                style={{
+                  flex: '1',
+                  padding: '10px',
+                  borderRadius: '15px',
+                  backgroundColor: '#4CAF50',  
+                  color: '#ffffff',
+                  fontSize: '16px',
+                  fontWeight: 'bold',
+                }}
+                disabled={isCombatActive !== 0}
+                onClick={startCombat}
+              >
+                Submit
+              </button>
+            )}
+            {isCombatActive === 2 && (
+              <button
+                style={{
+                  flex: '1',
+                  padding: '10px',
+                  borderRadius: '15px',
+                  backgroundColor: '#4CAF50',  
+                  color: '#ffffff',
+                  fontSize: '16px',
+                  fontWeight: 'bold',
+                }}
+                disabled={isCombatActive === 1}
+                onClick={handleNextPuzzleClick}
+              >
+                Next Puzzle
+              </button>
+            )}
           </div>
         </div>
       </div>

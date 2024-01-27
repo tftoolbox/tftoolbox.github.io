@@ -102,3 +102,28 @@
   justify-content: space-evenly;
   width: 225px;
 }
+
+.overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+}
+
+.result-message {
+  padding: 20px;
+  font-size: 24px;
+  font-weight: bold;
+  text-align: center;
+}
+
+.win {
+  color: #00ff00; /* Green color for "You Win!" */
+  background-color: #1E3852; /* Background color */
+}
+
+.lose {
+  color: #ff0000; /* Red color for "You Lose!" */
+  background-color: #1E3852; /* Background color */
+}
