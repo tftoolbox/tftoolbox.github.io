@@ -464,7 +464,6 @@ function Board({ enemyChampionsList, userChampionsList }) {
   const handleCircleDragStart = (event, player, index) => {
     if (player === 'enemy') {
       event.preventDefault(); // prevent dragging for enemy circles
-      setSelectedChampion(enemyChampions[index])
       return;
     }
 
@@ -472,7 +471,6 @@ function Board({ enemyChampionsList, userChampionsList }) {
     setDragging(true);
     setDraggedPlayer(player);
     setDragStartIndex(index);
-    setSelectedChampion(userChampions[index]);
   };
 
   const handleCircleDragEnd = () => {
@@ -640,6 +638,7 @@ function Board({ enemyChampionsList, userChampionsList }) {
                 onDragEnd={handleCircleDragEnd}
                 onDragOver={(e) => handleDragOver(e)}
                 onDrop={(e) => handleCircleDrop(e, { left: champion.currentPosition.left, top: champion.currentPosition.top }, index)}
+                onClick={() => setSelectedChampion(champion)}
               >
                 <Champion
                   key={index}
@@ -745,6 +744,7 @@ function Board({ enemyChampionsList, userChampionsList }) {
                 onDragEnd={handleCircleDragEnd}
                 onDragOver={(e) => handleDragOver(e)}
                 onDrop={(e) => handleCircleDrop(e, { left: champion.currentPosition.left, top: champion.currentPosition.top }, index)}
+                onClick={() => setSelectedChampion(champion)}
               >
                 <Champion
                   key={index}
