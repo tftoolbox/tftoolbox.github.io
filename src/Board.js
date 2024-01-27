@@ -283,12 +283,13 @@ function Board({ enemyChampionsList, userChampionsList, initialPuzzleNumber }) {
       newPuzzleNumber = getRandomInt(puzzlesList.length);
     } while (newPuzzleNumber === puzzleNumber);
 
-    console.log('New Puzzle Number: ', puzzleNumber);
+    // console.log('New Puzzle Number: ', puzzleNumber);
 
     setPuzzleNumber(newPuzzleNumber);
     const newChampions = Puzzles(newPuzzleNumber);
     setEnemyChampions(newChampions[0]);
     setUserChampions(newChampions[1]);
+    setSelectedChampion(newChampions[1][0]);
   };
 
   const startCombat = () => {
@@ -557,32 +558,38 @@ function Board({ enemyChampionsList, userChampionsList, initialPuzzleNumber }) {
         (champion, index) => index !== dragStartIndex && areChampionsOverlapping(champion, targetHexagon)
       );
 
-      if (overlappingIndex !== -1) {
-        setUserChampions((prevUserChampions) => {
-          const updatedUserChampions = [...prevUserChampions];
-          updatedUserChampions[overlappingIndex] = {
-            ...prevUserChampions[overlappingIndex], 
-            hexagonPosition: { left: prevUserChampions[dragStartIndex].hexagonPosition.left, top: prevUserChampions[dragStartIndex].hexagonPosition.top },
-            currentPosition: { left: prevUserChampions[dragStartIndex].currentPosition.left, top: prevUserChampions[dragStartIndex].currentPosition.top }
-          };
-          updatedUserChampions[dragStartIndex] = {
-            ...prevUserChampions[dragStartIndex],
-            hexagonPosition: { left: hexagonCoordinates.left, top: hexagonCoordinates.top },
-            currentPosition: { left: targetHexagon.currentPosition.left, top: targetHexagon.currentPosition.top }
-          };
-          return updatedUserChampions;
-        });
-      } else {
-        setUserChampions((prevUserChampions) => {
-          const updatedUserChampions = [...prevUserChampions];
-          updatedUserChampions[dragStartIndex] = {
-            ...prevUserChampions[dragStartIndex],
-            hexagonPosition: { left: hexagonCoordinates.left, top: hexagonCoordinates.top },
-            currentPosition: { left: targetHexagon.currentPosition.left, top: targetHexagon.currentPosition.top },
-            image: updatedUserChampions[dragStartIndex].image
-          };
-          return updatedUserChampions;
-        });
+      const enemyOverlappingIndex = enemyChampions.findIndex(
+        (champion, index) => index !== dragStartIndex && areChampionsOverlapping(champion, targetHexagon)
+      );
+
+      if (enemyOverlappingIndex === -1) {
+        if (overlappingIndex !== -1) {
+          setUserChampions((prevUserChampions) => {
+            const updatedUserChampions = [...prevUserChampions];
+            updatedUserChampions[overlappingIndex] = {
+              ...prevUserChampions[overlappingIndex], 
+              hexagonPosition: { left: prevUserChampions[dragStartIndex].hexagonPosition.left, top: prevUserChampions[dragStartIndex].hexagonPosition.top },
+              currentPosition: { left: prevUserChampions[dragStartIndex].currentPosition.left, top: prevUserChampions[dragStartIndex].currentPosition.top }
+            };
+            updatedUserChampions[dragStartIndex] = {
+              ...prevUserChampions[dragStartIndex],
+              hexagonPosition: { left: hexagonCoordinates.left, top: hexagonCoordinates.top },
+              currentPosition: { left: targetHexagon.currentPosition.left, top: targetHexagon.currentPosition.top }
+            };
+            return updatedUserChampions;
+          });
+        } else {
+          setUserChampions((prevUserChampions) => {
+            const updatedUserChampions = [...prevUserChampions];
+            updatedUserChampions[dragStartIndex] = {
+              ...prevUserChampions[dragStartIndex],
+              hexagonPosition: { left: hexagonCoordinates.left, top: hexagonCoordinates.top },
+              currentPosition: { left: targetHexagon.currentPosition.left, top: targetHexagon.currentPosition.top },
+              image: updatedUserChampions[dragStartIndex].image
+            };
+            return updatedUserChampions;
+          });
+        }
       }
     }
   };
@@ -597,7 +604,7 @@ function Board({ enemyChampionsList, userChampionsList, initialPuzzleNumber }) {
       event.preventDefault();
       return;
     }
-    if (circleCoordinates.top >= 230 && dragStartIndex !== null) {
+    if (circleCoordinates.top >= 398.31 && dragStartIndex !== null) {
       const targetChampion = {
         currentPosition: {
           left: circleCoordinates.left,
@@ -609,32 +616,38 @@ function Board({ enemyChampionsList, userChampionsList, initialPuzzleNumber }) {
         (champion, index) => index !== dragStartIndex && areChampionsOverlapping(champion, targetChampion)
       );
 
-      if (overlappingIndex !== -1) {
-        setUserChampions((prevUserChampions) => {
-          const updatedUserChampions = [...prevUserChampions];
-          updatedUserChampions[overlappingIndex] = {
-            ...prevUserChampions[overlappingIndex], 
-            hexagonPosition: { left: prevUserChampions[dragStartIndex].hexagonPosition.left, top: prevUserChampions[dragStartIndex].hexagonPosition.top },
-            currentPosition: { left: prevUserChampions[dragStartIndex].currentPosition.left, top: prevUserChampions[dragStartIndex].currentPosition.top }
-          };
-          updatedUserChampions[dragStartIndex] = {
-            ...prevUserChampions[dragStartIndex],
-            hexagonPosition: { left: prevUserChampions[index].hexagonPosition.left, top: prevUserChampions[index].hexagonPosition.top },
-            currentPosition: { left: targetChampion.currentPosition.left, top: targetChampion.currentPosition.top }
-          };
-          return updatedUserChampions;
-        });
-      } else {
-        setUserChampions((prevUserChampions) => {
-          const updatedUserChampions = [...prevUserChampions];
-          updatedUserChampions[dragStartIndex] = {
-            ...prevUserChampions[dragStartIndex],
-            hexagonPosition: { left: prevUserChampions[index].hexagonPosition.left, top: prevUserChampions[index].hexagonPosition.top },
-            currentPosition: { left: targetChampion.currentPosition.left, top: targetChampion.currentPosition.top },
-            image: updatedUserChampions[dragStartIndex].image
-          };
-          return updatedUserChampions;
-        });
+      const enemyOverlappingIndex = enemyChampions.findIndex(
+        (champion, index) => index !== dragStartIndex && areChampionsOverlapping(champion, targetChampion)
+      );
+
+      if (enemyOverlappingIndex === -1) {
+        if (overlappingIndex !== -1) {
+          setUserChampions((prevUserChampions) => {
+            const updatedUserChampions = [...prevUserChampions];
+            updatedUserChampions[overlappingIndex] = {
+              ...prevUserChampions[overlappingIndex], 
+              hexagonPosition: { left: prevUserChampions[dragStartIndex].hexagonPosition.left, top: prevUserChampions[dragStartIndex].hexagonPosition.top },
+              currentPosition: { left: prevUserChampions[dragStartIndex].currentPosition.left, top: prevUserChampions[dragStartIndex].currentPosition.top }
+            };
+            updatedUserChampions[dragStartIndex] = {
+              ...prevUserChampions[dragStartIndex],
+              hexagonPosition: { left: prevUserChampions[index].hexagonPosition.left, top: prevUserChampions[index].hexagonPosition.top },
+              currentPosition: { left: targetChampion.currentPosition.left, top: targetChampion.currentPosition.top }
+            };
+            return updatedUserChampions;
+          });
+        } else {
+          setUserChampions((prevUserChampions) => {
+            const updatedUserChampions = [...prevUserChampions];
+            updatedUserChampions[dragStartIndex] = {
+              ...prevUserChampions[dragStartIndex],
+              hexagonPosition: { left: prevUserChampions[index].hexagonPosition.left, top: prevUserChampions[index].hexagonPosition.top },
+              currentPosition: { left: targetChampion.currentPosition.left, top: targetChampion.currentPosition.top },
+              image: updatedUserChampions[dragStartIndex].image
+            };
+            return updatedUserChampions;
+          });
+        }
       }
     }
   };
