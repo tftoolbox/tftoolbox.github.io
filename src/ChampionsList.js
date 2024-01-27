@@ -1,3 +1,5 @@
+import ItemsList from './ItemsList';
+
 const MOVEMENT_SPEED = 30;
 const ATTACK_SPEED = 15;
 const ABILITY_CAST = 20;
@@ -208,7 +210,6 @@ function ChampionsList(championList, team, enemyPositions=[]) {
     for (var i = 0; i < championList.length; i++) {
       const championPair = championList[i];
       const champion = champions[championPair[0]];
-      console.log(champion);
       const starLevel = championPair[1];
       const headliner = championPair[2];
       const items = championPair[3];
@@ -217,14 +218,17 @@ function ChampionsList(championList, team, enemyPositions=[]) {
       const top = enemyPositions[i][1];
 
       if (starLevel === 1) {
-        returnList.push({ ...champion, index: i, team: team, hexagonPosition: { left: left, top: top }, currentPosition: { left: convertToPixels(left, 'left', top%2 === 1) - 25, top: convertToPixels(top, 'top', top%2 === 1) - 25 }, 
-                          items: items, headliner: headliner, starLevel: starLevel, health: champion.oneStarHealth, originalHealth: champion.oneStarHealth, attackDamage: champion.oneStarAD })
+        const newChampion = { ...champion, index: i, team: team, hexagonPosition: { left: left, top: top }, currentPosition: { left: convertToPixels(left, 'left', top%2 === 1) - 25, top: convertToPixels(top, 'top', top%2 === 1) - 25 }, 
+                          items: items, headliner: headliner, starLevel: starLevel, health: champion.oneStarHealth, originalHealth: champion.oneStarHealth, attackDamage: champion.oneStarAD };
+        returnList.push(ItemsList(newChampion));
       } else if (starLevel === 2) {
-        returnList.push({ ...champion, index: i, team: team, hexagonPosition: { left: left, top: top }, currentPosition: { left: convertToPixels(left, 'left', top%2 === 1) - 25, top: convertToPixels(top, 'top', top%2 === 1) - 25 }, 
-                          items: items, headliner: headliner, starLevel: starLevel, health: champion.twoStarHealth, originalHealth: champion.twoStarHealth, attackDamage: champion.twoStarAD })
+        const newChampion = { ...champion, index: i, team: team, hexagonPosition: { left: left, top: top }, currentPosition: { left: convertToPixels(left, 'left', top%2 === 1) - 25, top: convertToPixels(top, 'top', top%2 === 1) - 25 }, 
+                          items: items, headliner: headliner, starLevel: starLevel, health: champion.twoStarHealth, originalHealth: champion.twoStarHealth, attackDamage: champion.twoStarAD };
+        returnList.push(ItemsList(newChampion));
       } else {
-        returnList.push({ ...champion, index: i, team: team, hexagonPosition: { left: left, top: top }, currentPosition: { left: convertToPixels(left, 'left', top%2 === 1) - 25, top: convertToPixels(top, 'top', top%2 === 1) - 25 }, 
-                          items: items, headliner: headliner, starLevel: starLevel, health: champion.threeStarHealth, originalHealth: champion.threeStarHealth, attackDamage: champion.threeStarAD })
+        const newChampion = { ...champion, index: i, team: team, hexagonPosition: { left: left, top: top }, currentPosition: { left: convertToPixels(left, 'left', top%2 === 1) - 25, top: convertToPixels(top, 'top', top%2 === 1) - 25 }, 
+                          items: items, headliner: headliner, starLevel: starLevel, health: champion.threeStarHealth, originalHealth: champion.threeStarHealth, attackDamage: champion.threeStarAD };
+        returnList.push(ItemsList(newChampion));
       }
     }
   } else {
@@ -236,14 +240,17 @@ function ChampionsList(championList, team, enemyPositions=[]) {
       const items = championPair[3];
   
       if (starLevel === 1) {
-        returnList.push({ ...champion, index: i, team: team, hexagonPosition: { left: column, top: row }, currentPosition: { left: convertToPixels(column, 'left', row%2 === 1) - 25, top: convertToPixels(row, 'top', row%2 === 1) - 25 }, 
-                          items: items, headliner: headliner, starLevel: starLevel, health: champion.oneStarHealth, originalHealth: champion.oneStarHealth, attackDamage: champion.oneStarAD })
+        const newChampion = { ...champion, index: i, team: team, hexagonPosition: { left: column, top: row }, currentPosition: { left: convertToPixels(column, 'left', row%2 === 1) - 25, top: convertToPixels(row, 'top', row%2 === 1) - 25 }, 
+                          items: items, headliner: headliner, starLevel: starLevel, health: champion.oneStarHealth, originalHealth: champion.oneStarHealth, attackDamage: champion.oneStarAD };
+        returnList.push(ItemsList(newChampion));
       } else if (starLevel === 2) {
-        returnList.push({ ...champion, index: i, team: team, hexagonPosition: { left: column, top: row }, currentPosition: { left: convertToPixels(column, 'left', row%2 === 1) - 25, top: convertToPixels(row, 'top', row%2 === 1) - 25 }, 
-                          items: items, headliner: headliner, starLevel: starLevel, health: champion.twoStarHealth, originalHealth: champion.twoStarHealth, attackDamage: champion.twoStarAD })
+        const newChampion = { ...champion, index: i, team: team, hexagonPosition: { left: column, top: row }, currentPosition: { left: convertToPixels(column, 'left', row%2 === 1) - 25, top: convertToPixels(row, 'top', row%2 === 1) - 25 }, 
+                          items: items, headliner: headliner, starLevel: starLevel, health: champion.twoStarHealth, originalHealth: champion.twoStarHealth, attackDamage: champion.twoStarAD };
+        returnList.push(ItemsList(newChampion));
       } else {
-        returnList.push({ ...champion, index: i, team: team, hexagonPosition: { left: column, top: row }, currentPosition: { left: convertToPixels(column, 'left', row%2 === 1) - 25, top: convertToPixels(row, 'top', row%2 === 1) - 25 }, 
-                          items: items, headliner: headliner, starLevel: starLevel, health: champion.threeStarHealth, originalHealth: champion.threeStarHealth, attackDamage: champion.threeStarAD })
+        const newChampion = { ...champion, index: i, team: team, hexagonPosition: { left: column, top: row }, currentPosition: { left: convertToPixels(column, 'left', row%2 === 1) - 25, top: convertToPixels(row, 'top', row%2 === 1) - 25 }, 
+                          items: items, headliner: headliner, starLevel: starLevel, health: champion.threeStarHealth, originalHealth: champion.threeStarHealth, attackDamage: champion.threeStarAD };
+        returnList.push(ItemsList(newChampion));
       }
   
       column = column + 1;

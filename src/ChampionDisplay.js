@@ -2,9 +2,11 @@ import React from 'react';
 import './Board.css';
 import Ranged from './Ranged.png';
 import { ATTACK_SPEED } from './ChampionsList';
+import { GetItemDetails } from './ItemsList';
 
 const ChampionDisplay = (champion) => {
   const [showAbility, setShowAbility] = React.useState(false);
+  const [showItem, setShowItem] = React.useState(Array(champion.champion.items.length).fill(false));
   const [mousePos, setMousePos] = React.useState({ x: 0, y: 0 });
   const currentChampion = champion.champion;
   
@@ -24,8 +26,72 @@ const ChampionDisplay = (champion) => {
           <span style={{ color: 'yellow' }}>★ ★ ★</span>
         )}
       </div>
-      <div style={{ paddingLeft: '10px', paddingRight: '10px' }}>
-        <img src={currentChampion.image} alt={currentChampion.type} style={{ width: '100%', borderRadius: '8px' }} />
+      <div style={{ paddingTop: '0px', paddingBottom: '0px', paddingLeft: '10px', paddingRight: '10px', margin: '0px', position: 'relative' }}>
+        <img src={currentChampion.image} alt={currentChampion.type} style={{ width: '100%', borderRadius: '8px', zIndex: 1, margin: '0px', padding: '0px' }} />
+        <div style={{
+          position: 'absolute',
+          display: 'flex',
+          flexDirection: 'row',
+          left: '0',
+          right: '0',
+          margin: 'auto',
+          marginTop: '-65px',
+          padding: '0px',
+          justifyContent: 'space-evenly',
+          zIndex: 2,
+        }}>
+          {currentChampion.items.length > 0 && currentChampion.items.map((item, index) => (
+            <div
+              key={index}
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                width: '50px',
+                height: '50px',
+                justifyContent: 'center',
+                alignItems: 'center',
+                border: '1px solid #ffffff',
+                borderRadius: '8px',
+                background: '#1E3852',
+              }}
+              onMouseOver={(e) => {
+                const updatedShowItem = [...showItem];
+                updatedShowItem[index] = true;
+                setShowItem(updatedShowItem);
+                setMousePos({
+                  x: e.clientX - 500,
+                  y: e.clientY - 100,
+                });
+              }}
+              onMouseOut={() => {
+                const updatedShowItem = [...showItem];
+                updatedShowItem[index] = false;
+                setShowItem(updatedShowItem);
+              }}
+            >
+              {showItem[index] && (
+                <div
+                  style={{
+                    position: 'absolute',
+                    left: `${mousePos.x}px`,
+                    top: `${mousePos.y}px`,
+                    padding: '10px',
+                    background: '#1E3852',
+                    color: '#fff',
+                    borderRadius: '4px',
+                  }}
+                >
+                  {GetItemDetails(item).description}
+                </div>
+              )}
+              {item !== '#1E3852' ? (
+                <img src={GetItemDetails(item).image} alt={GetItemDetails(item).type} style={{ width: '100%', borderRadius: '8px' }} />
+              ) : (
+                <div style={{ width: '100%', height: '100%', backgroundColor: '#1E3852', borderRadius: '8px' }}></div>
+              )}
+            </div>
+          ))}
+        </div>
       </div>
       <div style={{ paddingLeft: '10px', paddingRight: '10px', marginTop: '10px', marginBottom: '15px' }}>
         <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -64,7 +130,7 @@ const ChampionDisplay = (champion) => {
       <div style={{ display: 'flex', flexDirection: 'row', paddingLeft: '10px', paddingRight: '10px', justifyContent: 'space-around', marginTop: '2px' }}>
         <div style={{ display: 'flex', flexDirection: 'column', width: '30px', height: '50px', justifyContent: 'center', alignItems: 'center' }}>
           <img src="https://cdn.tft.tools/general/as.png?w=14" alt="attack-damage" style={{ width: '100%' }} />
-          <span style={{ color: '#ffffff', paddingTop: '2px', fontSize: '14px' }}>{Math.round(ATTACK_SPEED/currentChampion.attackSpeed * 100)/100}</span>
+          <span style={{ color: '#ffffff', paddingTop: '2px', fontSize: '14px' }}>{(Math.floor(ATTACK_SPEED/currentChampion.attackSpeed * 100)/100).toFixed(2)}</span>
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', width: '30px', height: '50px', justifyContent: 'center', alignItems: 'center' }}>
           <img src="https://cdn.tft.tools/general/crit_chance.png?w=14" alt="attack-damage" style={{ width: '100%' }} />

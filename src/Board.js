@@ -9,7 +9,7 @@ import ChampionDisplay from './ChampionDisplay';
 import { puzzlesList, Puzzles } from './Puzzles';
 
 const CIRCLE_DIAMETER = 50;
-const ITERATION_CYCLE = 25;
+const ITERATION_CYCLE = 50;
 var globalIteration = 0;
 
 const adjacentHexagons = {
@@ -268,6 +268,7 @@ function Board({ enemyChampionsList, userChampionsList, initialPuzzleNumber }) {
   const [selectedChampion, setSelectedChampion] = useState(userChampionsList[0]);
   const [puzzleNumber, setPuzzleNumber] = useState(initialPuzzleNumber);
   // const [combatIteration, setCombatIteration] = useState(0); // will implement later for overtime
+  console.log(userChampions);
 
   function getRandomInt(max) {
     return Math.floor(Math.random() * max);
@@ -832,7 +833,7 @@ function Board({ enemyChampionsList, userChampionsList, initialPuzzleNumber }) {
                   flex: '1',
                   padding: '10px',
                   borderRadius: '15px',
-                  backgroundColor: '#4CAF50',  
+                  backgroundColor: isCombatActive !== 0 ? '#ccc' : '#4CAF50',
                   color: '#ffffff',
                   fontSize: '16px',
                   fontWeight: 'bold',

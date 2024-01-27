@@ -119,11 +119,11 @@
 }
 
 .win {
-  color: #00ff00; /* Green color for "You Win!" */
-  background-color: #1E3852; /* Background color */
+  color: #00ff00;
+  background-color: #1E3852;
 }
 
 .lose {
-  color: #ff0000; /* Red color for "You Lose!" */
-  background-color: #1E3852; /* Background color */
+  color: #ff0000;
+  background-color: #1E3852;
 }
