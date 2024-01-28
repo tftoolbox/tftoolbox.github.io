@@ -6,10 +6,27 @@ import { GetItemDetails } from './ItemsList';
 
 const ChampionDisplay = (champion) => {
   const [showAbility, setShowAbility] = React.useState(false);
-  const [showItem, setShowItem] = React.useState(Array(champion.champion.items.length).fill(false));
-  const [mousePos, setMousePos] = React.useState({ x: 0, y: 0 });
+  const [showItemOne, setShowItemOne] = React.useState(false);
+  const [showItemTwo, setShowItemTwo] = React.useState(false);
+  const [showItemThree, setShowItemThree] = React.useState(false);
   const currentChampion = champion.champion;
-  
+  const currentChampionItems = currentChampion.items;
+  var itemDetailsOne = null;
+  var itemDetailsTwo = null;
+  var itemDetailsThree = null;
+
+  if (currentChampionItems.length >= 1) {
+    itemDetailsOne = GetItemDetails(currentChampionItems[0]);
+  } 
+  if (currentChampionItems.length >= 2) {
+    itemDetailsTwo = GetItemDetails(currentChampionItems[1]);
+  }
+  if (currentChampionItems.length >= 3) {
+    itemDetailsThree = GetItemDetails(currentChampionItems[2]);
+  }
+
+  console.log(currentChampion.attackDamage);
+
   return (
     <div style={{ background: '#18222F', marginTop: '10px', marginBottom: '10px', paddingTop: '10px', paddingBottom: '15px', borderRadius: '8px', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', width: '225px' }}>
       <h2 style={{ color: '#ffffff', textAlign: 'center', marginBottom: '0px', marginTop: '0px', padding: '0px', fontSize: '20px' }}>
@@ -40,9 +57,9 @@ const ChampionDisplay = (champion) => {
           justifyContent: 'space-evenly',
           zIndex: 2,
         }}>
-          {currentChampion.items.length > 0 && currentChampion.items.map((item, index) => (
+          {itemDetailsOne && (
             <div
-              key={index}
+              key={0}
               style={{
                 display: 'flex',
                 flexDirection: 'column',
@@ -54,43 +71,108 @@ const ChampionDisplay = (champion) => {
                 borderRadius: '8px',
                 background: '#1E3852',
               }}
-              onMouseOver={(e) => {
-                const updatedShowItem = [...showItem];
-                updatedShowItem[index] = true;
-                setShowItem(updatedShowItem);
-                setMousePos({
-                  x: e.clientX - 500,
-                  y: e.clientY - 100,
-                });
-              }}
-              onMouseOut={() => {
-                const updatedShowItem = [...showItem];
-                updatedShowItem[index] = false;
-                setShowItem(updatedShowItem);
-              }}
+              onMouseOver={() => setShowItemOne(true)}
+              onMouseOut={() => setShowItemOne(false)}
             >
-              {showItem[index] && (
+              {showItemOne && (
                 <div
                   style={{
                     position: 'absolute',
-                    left: `${mousePos.x}px`,
-                    top: `${mousePos.y}px`,
+                    transform: 'translate(-50%, -50%)',
+                    width: 'auto',
+                    height: 'auto',
+                    padding: '10px',
+                    background: '#1E3852',
+                    color: '#fff',
+                    borderRadius: '4px',
+                    zIndex: 3
+                  }}
+                >
+                  <b>{itemDetailsOne.type}</b>
+                  <br/><br/>
+                  {itemDetailsOne.description}
+                </div>
+              )}
+              <img src={itemDetailsOne.image} alt={itemDetailsOne.type} style={{ width: '100%', borderRadius: '8px' }} />
+            </div>
+          )}
+          {itemDetailsTwo && (
+            <div
+              key={1}
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                width: '50px',
+                height: '50px',
+                justifyContent: 'center',
+                alignItems: 'center',
+                border: '1px solid #ffffff',
+                borderRadius: '8px',
+                background: '#1E3852',
+              }}
+              onMouseOver={() => setShowItemTwo(true)}
+              onMouseOut={() => setShowItemTwo(false)}
+            >
+              {showItemTwo && (
+                <div
+                  style={{
+                    position: 'absolute',
+                    transform: 'translate(-50%, -50%)',
+                    width: 'auto',
+                    height: 'auto',
+                    padding: '10px',
+                    background: '#1E3852',
+                    color: '#fff',
+                    borderRadius: '4px',
+                    zIndex: 3
+                  }}
+                >
+                  <b>{itemDetailsTwo.type}</b>
+                  <br/><br/>
+                  {itemDetailsTwo.description}
+                </div>
+              )}
+              <img src={itemDetailsTwo.image} alt={itemDetailsTwo.type} style={{ width: '100%', borderRadius: '8px' }} />
+            </div>
+          )}
+          {itemDetailsThree && (
+            <div
+              key={2}
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                width: '50px',
+                height: '50px',
+                justifyContent: 'center',
+                alignItems: 'center',
+                border: '1px solid #ffffff',
+                borderRadius: '8px',
+                background: '#1E3852',
+              }}
+              onMouseOver={() => setShowItemThree(true)}
+              onMouseOut={() => setShowItemThree(false)}
+            >
+              {showItemThree && (
+                <div
+                  style={{
+                    position: 'absolute',
+                    transform: 'translate(-50%, -50%)',
+                    width: 'auto',
+                    height: 'auto',
                     padding: '10px',
                     background: '#1E3852',
                     color: '#fff',
                     borderRadius: '4px',
                   }}
                 >
-                  {GetItemDetails(item).description}
+                  <b>{itemDetailsThree.type}</b>
+                  <br/><br/>
+                  {itemDetailsThree.description}
                 </div>
               )}
-              {item !== '#1E3852' ? (
-                <img src={GetItemDetails(item).image} alt={GetItemDetails(item).type} style={{ width: '100%', borderRadius: '8px' }} />
-              ) : (
-                <div style={{ width: '100%', height: '100%', backgroundColor: '#1E3852', borderRadius: '8px' }}></div>
-              )}
+              <img src={itemDetailsThree.image} alt={itemDetailsThree.type} style={{ width: '100%', borderRadius: '8px' }} />
             </div>
-          ))}
+          )}
         </div>
       </div>
       <div style={{ paddingLeft: '10px', paddingRight: '10px', marginTop: '10px', marginBottom: '15px' }}>
@@ -112,11 +194,11 @@ const ChampionDisplay = (champion) => {
       <div style={{ display: 'flex', flexDirection: 'row', paddingLeft: '10px', paddingRight: '10px', justifyContent: 'space-around' }}>
         <div style={{ display: 'flex', flexDirection: 'column', width: '30px', height: '50px', justifyContent: 'center', alignItems: 'center' }}>
           <img src="https://cdn.tft.tools/general/ad.png?w=14" alt="attack-damage" style={{ width: '100%' }} />
-          <span style={{ color: '#ffffff', paddingTop: '2px', fontSize: '14px' }}>{Math.round(currentChampion.attackDamage)}</span>
+          <span style={{ color: '#ffffff', paddingTop: '2px', fontSize: '14px' }}>{Math.floor(currentChampion.attackDamage)}</span>
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', width: '30px', height: '50px', justifyContent: 'center', alignItems: 'center' }}>
           <img src="https://cdn.tft.tools/general/ap.png?w=14" alt="attack-damage" style={{ width: '100%' }} />
-          <span style={{ color: '#ffffff', paddingTop: '2px', fontSize: '14px' }}>{Math.round(currentChampion.abilityPower)}</span>
+          <span style={{ color: '#ffffff', paddingTop: '2px', fontSize: '14px' }}>{Math.floor(currentChampion.abilityPower)}</span>
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', width: '30px', height: '50px', justifyContent: 'center', alignItems: 'center' }}>
           <img src="https://cdn.tft.tools/general/armor.png?w=14" alt="attack-damage" style={{ width: '100%' }} />
@@ -148,21 +230,16 @@ const ChampionDisplay = (champion) => {
       <div style={{ display: 'flex', flexDirection: 'row', paddingLeft: '10px', paddingRight: '10px', marginTop: '15px', justifyContent: 'space-around' }}>
         <div 
           style={{ display: 'flex', flexDirection: 'column', width: '50px', height: '50px', justifyContent: 'center', alignItems: 'center', border: '1px solid #ffffff', borderRadius: '8px' }}
-          onMouseOver={(e) => {
-            setShowAbility(true);
-            setMousePos({ 
-              x: e.clientX - 500, 
-              y: e.clientY - 100
-            });
-          }}
+          onMouseOver={() => setShowAbility(true)}
           onMouseOut={() => setShowAbility(false)}
         >
           {showAbility && (
             <div 
               style={{ 
                 position: 'absolute', 
-                left: `${mousePos.x}px`,
-                top: `${mousePos.y}px`,
+                transform: 'translate(-50%, -50%)',
+                width: 'auto',
+                height: 'auto',
                 padding: '10px',
                 background: '#1E3852',
                 color: '#fff',

@@ -308,6 +308,11 @@ function Board({ enemyChampionsList, userChampionsList, initialPuzzleNumber }) {
   
       const updateChampionAtIndex = async (index) => {
         const tempChampion = allChampions[index];
+        var selectedChampionFound = false;
+
+        if ((tempChampion.team === selectedChampion.team) && (tempChampion.index === selectedChampion.index)) {
+          selectedChampionFound = true;
+        }
         
         var allChampionsProjectileIteration = 0;
         const allProjectiles = tempChampion.projectiles;
@@ -424,13 +429,22 @@ function Board({ enemyChampionsList, userChampionsList, initialPuzzleNumber }) {
             }
           }
         }
+
+        return selectedChampionFound && allChampions[index].alive;
       };
   
       const updateChampionsSequentially = async (startTime) => {
+        var selectedChampionCompleted = false;
+
         for (let index = 0; index < allChampions.length; index++) {
-          await updateChampionAtIndex(index);
+          const selectedChampionFound = await updateChampionAtIndex(index);
+          if (selectedChampionFound) {
+            setSelectedChampion(allChampions[index]);
+            selectedChampionCompleted = true;
+          }
         }
-        console.log('after champions', allChampions);
+        
+        // console.log('after champions', allChampions);
 
         const aliveChampions = allChampions.filter(x => x.alive); 
 
@@ -444,11 +458,19 @@ function Board({ enemyChampionsList, userChampionsList, initialPuzzleNumber }) {
               ...champion, index: iteration
             };
             updatedUserChampions.push(champion);
+            if (!selectedChampionCompleted) {
+              setSelectedChampion(champion);
+              selectedChampionCompleted = true;
+            }
           } else {
             champion = {
               ...champion, index: iteration
             };
             updatedEnemyChampions.push(champion);
+            if (!selectedChampionCompleted) {
+              setSelectedChampion(champion);
+              selectedChampionCompleted = true;
+            }
           }
           iteration += 1;
         });
@@ -705,6 +727,7 @@ function Board({ enemyChampionsList, userChampionsList, initialPuzzleNumber }) {
                   alive={champion.alive}
                   attackRange={champion.attackRange}
                   health={champion.health}
+                  originalHealth={champion.originalHealth}
                   attackDamage={champion.attackDamage}
                   totalMana={champion.totalMana}
                   mana={champion.mana}
@@ -811,6 +834,7 @@ function Board({ enemyChampionsList, userChampionsList, initialPuzzleNumber }) {
                   alive={champion.alive}
                   attackRange={champion.attackRange}
                   health={champion.health}
+                  originalHealth={champion.originalHealth}
                   attackDamage={champion.attackDamage}
                   totalMana={champion.totalMana}
                   mana={champion.mana}

@@ -1,7 +1,7 @@
 import React from 'react';
 import './Champion.css'; 
 
-function Champion({ key, team, index, hexagonPosition, currentPosition, image, type, starLevel, headliner, items, alive, attackRange, health, attackDamage, totalMana, mana, abilityPower, armor, magicResist }) {
+function Champion({ key, team, index, hexagonPosition, currentPosition, image, type, starLevel, headliner, items, alive, attackRange, health, originalHealth,attackDamage, totalMana, mana, abilityPower, armor, magicResist }) {
   const healthTextStyle = {
     color: team === 'enemy' ? 'red' : 'lightgreen',
     fontSize: '12px', 
@@ -38,16 +38,20 @@ function Champion({ key, team, index, hexagonPosition, currentPosition, image, t
         backgroundSize: 'cover', 
       }}
     >
-      <div className="health-overlay">
-        <span className="health-text" style={healthTextStyle}>{roundedHealth}</span>
-      </div>
-      {totalMana && (
-        <div className="mana-overlay">
-          <span className="mana-text" style={manaTextStyle}>
-            {roundedMana} / {totalMana}
-          </span>
+      <div style={{  }}>
+        <div style={{ display: 'flex', alignItems: 'center', marginTop: '-2.5px' }}>
+          <div style={{ flex: '1', backgroundColor: 'rgba(0,0,0,0.5)', height: '7.5px' }}>
+            <div style={{ backgroundColor: 'green', height: '100%', width: `calc(${(health / originalHealth) * 100}%` }}></div>
+          </div>
         </div>
-      )}
+        {totalMana > 0 && (
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <div style={{ flex: '1', backgroundColor: 'rgba(0,0,0,0.5)', height: '7.5px' }}>
+              <div style={{ backgroundColor: '#3E92CC', height: '100%', width: `${(mana / totalMana) * 100}%` }}></div>
+            </div>
+          </div>
+        )}
+      </div>
       <div className="star-overlay">
         {renderStars()}
       </div>
