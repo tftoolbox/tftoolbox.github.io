@@ -6,3 +6,34 @@ body {
   -moz-osx-font-smoothing: grayscale;
   background-color: #13293D;
 }
+
+h1 {
+  font-size: 8.85vmin;
+  font-weight: 700;
+  color: #fff;
+  margin: "0px";
+}
+
+h2 {
+  font-size: 7vmin;
+  font-weight: 600;
+  color: #fff;
+}
+
+p {
+  font-size: 3vmin;
+  font-weight: 400;
+  color: #fff;
+}
+
+code {
+  font-family: 'Outfit', sans-serif;
+}
+a {
+  text-decoration: none;
+  color: black;
+}
+a:hover {
+  text-decoration: none;
+  color: rgba(0, 0, 0, 0.349);
+}

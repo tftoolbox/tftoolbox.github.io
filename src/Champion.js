@@ -2,15 +2,15 @@ import React from 'react';
 import './Champion.css'; 
 
 function Champion({ key, team, index, hexagonPosition, currentPosition, image, type, starLevel, headliner, items, alive, attackRange, health, originalHealth,attackDamage, totalMana, mana, abilityPower, armor, magicResist }) {
-  const healthTextStyle = {
-    color: team === 'enemy' ? 'red' : 'lightgreen',
-    fontSize: '12px', 
-  };
+  // const healthTextStyle = {
+  //   color: team === 'enemy' ? 'red' : 'lightgreen',
+  //   fontSize: '12px', 
+  // };
 
-  const manaTextStyle = {
-    color: 'lightblue',
-    fontSize: '12px',
-  };
+  // const manaTextStyle = {
+  //   color: 'lightblue',
+  //   fontSize: '12px',
+  // };
 
   const starStyle = {
     color: 'yellow',
@@ -25,17 +25,20 @@ function Champion({ key, team, index, hexagonPosition, currentPosition, image, t
     return stars;
   };
 
-  const roundedHealth = Math.ceil(health);
-  const roundedMana = Math.ceil(mana);
+  // const roundedHealth = Math.ceil(health);
+  // const roundedMana = Math.ceil(mana);
+
+  const borderColor = team === 'user' ? 'blue' : 'red';
 
   return (
     <div
       className={"champion"}
       style={{ 
-        left: 0 + 'px', 
-        top: 0 + 'px', 
+        left: -2 + 'px', 
+        top: -2 + 'px', 
         backgroundImage: `url(${image})`,
         backgroundSize: 'cover', 
+        border: `2px solid ${borderColor}`
       }}
     >
       <div style={{  }}>

@@ -14,7 +14,7 @@ const convertToPixels = (coordinate, leftOrTop, even) => {
     return 459.75 + ((coordinate + 1) * 2.95) + (coordinate * 62.4) + 62.4 / 2;
   }
   if (leftOrTop === 'top') {
-    return (coordinate * 20.3) + (coordinate * 36) + 36 + 173.11;
+    return (coordinate * 20.3) + (coordinate * 36) + 36 + 158.11;
   }
 }
 
@@ -264,4 +264,4 @@ function ChampionsList(championList, team, enemyPositions=[]) {
 }
 
 export default ChampionsList;
-export {ATTACK_SPEED};
+export { ATTACK_SPEED };

@@ -3,6 +3,7 @@ import './Board.css';
 import Ranged from './Ranged.png';
 import { ATTACK_SPEED } from './ChampionsList';
 import { GetItemDetails } from './ItemsList';
+import { GetAbilityDetails } from './AbilitiesList';
 
 const ChampionDisplay = (champion) => {
   const [showAbility, setShowAbility] = React.useState(false);
@@ -11,6 +12,9 @@ const ChampionDisplay = (champion) => {
   const [showItemThree, setShowItemThree] = React.useState(false);
   const currentChampion = champion.champion;
   const currentChampionItems = currentChampion.items;
+  const currentChampionAbility = GetAbilityDetails(currentChampion.type);
+
+  console.log(currentChampionAbility);
   var itemDetailsOne = null;
   var itemDetailsTwo = null;
   var itemDetailsThree = null;
@@ -24,8 +28,6 @@ const ChampionDisplay = (champion) => {
   if (currentChampionItems.length >= 3) {
     itemDetailsThree = GetItemDetails(currentChampionItems[2]);
   }
-
-  console.log(currentChampion.attackDamage);
 
   return (
     <div style={{ background: '#18222F', marginTop: '10px', marginBottom: '10px', paddingTop: '10px', paddingBottom: '15px', borderRadius: '8px', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', width: '225px' }}>
@@ -44,7 +46,17 @@ const ChampionDisplay = (champion) => {
         )}
       </div>
       <div style={{ paddingTop: '0px', paddingBottom: '0px', paddingLeft: '10px', paddingRight: '10px', margin: '0px', position: 'relative' }}>
-        <img src={currentChampion.image} alt={currentChampion.type} style={{ width: '100%', borderRadius: '8px', zIndex: 1, margin: '0px', padding: '0px' }} />
+      <img
+        src={currentChampion.image}
+        alt={currentChampion.type}
+        style={{
+          width: '100%',
+          borderRadius: '8px',
+          zIndex: 1,
+          margin: '0px',
+          padding: '0px',
+        }}
+      />
         <div style={{
           position: 'absolute',
           display: 'flex',
@@ -246,14 +258,10 @@ const ChampionDisplay = (champion) => {
                 borderRadius: '4px'
               }}
             >
-              <b>Rawhide</b>
-              <br /><br />
-              Passive: Tahm Kench reduces each instance of incoming damage.
-              <br /><br />
-              Headliner Effect: +300 bonus Health.
+              <div dangerouslySetInnerHTML={{ __html: currentChampionAbility.ability }} />
             </div>
           )}
-          <img src="https://cdn.mobalytics.gg/assets/lol/images/dd/champions/abilities/TahmKenchE.png?V3" alt="rawhide" style={{ width: '100%', borderRadius: '8px' }} />
+          <img src={currentChampionAbility.image} alt={currentChampion.type} style={{ width: '100%', borderRadius: '8px' }} />
         </div>
       </div>
     </div>

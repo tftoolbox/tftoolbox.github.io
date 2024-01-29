@@ -539,7 +539,7 @@ function Board({ enemyChampionsList, userChampionsList, initialPuzzleNumber }) {
       return 459.75 + ((coordinate + 1) * 2.95) + (coordinate * 62.4) + 62.4 / 2;
     }
     if (leftOrTop === 'top') {
-      return (coordinate * 20.3) + (coordinate * 36) + 36 + 173.11;
+      return (coordinate * 20.3) + (coordinate * 36) + 36 + 158.11;
     }
   }
 
@@ -551,7 +551,7 @@ function Board({ enemyChampionsList, userChampionsList, initialPuzzleNumber }) {
       return Math.floor((coordinate - 2.95 - 31.2 - 459.75) / (2.95 + 62.4));
     }
     if (leftOrTop === 'top') {
-      return Math.floor((coordinate - 36 - 173.11) / (20.3 + 36));
+      return Math.floor((coordinate - 36 - 158.11) / (20.3 + 36));
     }
   }
 
@@ -675,9 +675,8 @@ function Board({ enemyChampionsList, userChampionsList, initialPuzzleNumber }) {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', width: '100vw', backgroundColor: '#13293D', alignItems: 'center', justifyContent: 'center' }}>
-      <div style={{ height: '10%' }} />
-      <div style={{ display: 'flex', flexDirection: 'row', width: '100%', height: '85%' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '90vh', width: '100vw', backgroundColor: '#13293D', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ display: 'flex', flexDirection: 'row', width: '100%', height: '95%' }}>
         <div className='section left-section'>
           <DualButton />
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
@@ -901,6 +900,7 @@ function Board({ enemyChampionsList, userChampionsList, initialPuzzleNumber }) {
           </div>
         </div>
       </div>
+      <div style={{ width: '100%', height: '5%' }} />
     </div>
   );
 }
