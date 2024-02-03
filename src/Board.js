@@ -325,6 +325,10 @@ function Board({ enemyChampionsList, userChampionsList, initialPuzzleNumber }) {
                 allChampions[index] = { ...allChampions[index], health: Math.round(allChampions[index].health + allChampions[index].originalHealth * 0.1) };
                 allChampions[index].stats[allChampionsStatIteration] = { ...stat, iteration: 2 * MOVEMENT_SPEED };
                 
+              } else if (stat.type === 'archangelStaff') {
+                allChampions[index] = { ...allChampions[index], abilityPower: allChampions[index].abilityPower + 30 };
+                allChampions[index].stats[allChampionsStatIteration] = { ...stat, iteration: 5 * MOVEMENT_SPEED };
+
               } else {
                 // When stat has no iterations left, return back to base
                 if (stat.type === 'shred') {
