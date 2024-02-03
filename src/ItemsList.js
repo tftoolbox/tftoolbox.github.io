@@ -24,7 +24,7 @@ const items = {
   "Last Whisper": { image: "https://rerollcdn.com/items/LastWhisper.png", type: "Giant Slayer", flatStats: { abilityPower: 10 }, percentStats: { attackSpeed: 0.18 }, description: "Physical damage 30% Sunders the target for 3 seconds. This effect does not stack.", 
   onAttackAbility: {}, oncePerCombat: {}, everyXSeconds: {}, basedOnTarget: {}, statusEffectOnAttack: { type: 'lastWhisper' } },
   "Steadfast Heart": { image: "https://rerollcdn.com/items/LastWhisper.png", type: "Giant Slayer", flatStats: { abilityPower: 10 }, percentStats: { attackSpeed: 0.18 }, description: "Take 8% less damage. While above 50% Health, take 15% less damage instead.", 
-  onAttackAbility: {}, oncePerCombat: {}, everyXSeconds: {}, basedOnTarget: {}, statusEffectOnAttack: {}, constantThreshold: {} },
+  onAttackAbility: {}, oncePerCombat: {}, everyXSeconds: {}, basedOnTarget: {}, statusEffectOnAttack: {}, constantThreshold: { type: 'steadfastHeart', baseState: true } },
 }
 
 function GetItemDetails(itemKey) {
@@ -71,6 +71,9 @@ function ItemsList(champion) {
 
       if (Object.keys(items[championItems[i]].constantThreshold).length > 0) {
         newChampion = { ...newChampion, constantThreshold: [ ...newChampion.constantThreshold, items[championItems[i]].constantThreshold ] };
+        if (items[championItems[i]].constantThreshold.type === 'steadfastHeart') {
+          newChampion = { ...newChampion, damageReduction: newChampion.damageReduction + 0.15 };
+        }
       }
     }
   }

@@ -458,7 +458,22 @@ function Board({ enemyChampionsList, userChampionsList, initialPuzzleNumber }) {
                     const manaIncrement = Math.min(42.5, (0.01 * projectile.damage) + (0.07 * postMitigationAttackDamage));
                     const newCurrentMana = Math.min(allChampions[index].totalMana, Math.round(allChampions[index].mana + manaIncrement))
 
-                    // Find any stat effects from projectile
+                    // Check for any constant threshold changes
+                    if (allChampions[index].constantThreshold.length > 0) {
+                      for (const item of allChampions[index].constantThreshold) {
+                        if (item.type === 'steadfastHeart') {
+                          if (allChampions[index].health * 2 <= allChampions[index].originalHealth && item.baseState) {
+                            allChampions[index].damageReduction = allChampions[index].damageReduction - 0.15 + 0.08;
+                            item.baseState = false;
+                          } else if (allChampions[index].health * 2 >= allChampions[index] && !item.baseState) {
+                            allChampions[index].damageReduction = allChampions[index].damageReduction - 0.08 + 0.15;
+                            item.baseState = true;
+                          } 
+                        }
+                      }
+                    }
+
+                    // Find any stat effects from projectile (from attacks)
                     if (projectile.hasOwnProperty('effect')) {
                       for (const effect of projectile.effect) {
                         if (effect.type === 'lastWhisper') {
