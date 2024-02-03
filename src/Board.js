@@ -660,7 +660,14 @@ function Board({ enemyChampionsList, userChampionsList, initialPuzzleNumber }) {
                     }
                   }
 
-                  const newProjectile = { type: 'attack', damage: allChampions[index].attackDamage, extraDamage: allChampions[index].extraDamage + additionalAttackDamage, iteration: allChampions[index].attackProjectileSpeed }
+                  // Check for critical chance
+                  const randomValue = Math.random();
+                  var attackCriticalDamage = 0;
+                  if (randomValue < allChampions[index].criticalChance) {
+                    attackCriticalDamage = allChampions[index].criticalDamage;
+                  }
+
+                  const newProjectile = { type: 'attack', damage: allChampions[index].attackDamage + allChampions[index].attackDamage * attackCriticalDamage, extraDamage: allChampions[index].extraDamage + additionalAttackDamage, iteration: allChampions[index].attackProjectileSpeed }
                   const newProjectileList = [ ...closestEnemy.projectiles, newProjectile ];
                   allChampions[closestEnemy.index] = { ...closestEnemy, projectiles: newProjectileList };
 
@@ -723,7 +730,15 @@ function Board({ enemyChampionsList, userChampionsList, initialPuzzleNumber }) {
                       }
                     }
                   }
-                  const newProjectile = { type: 'ability', damage: allChampions[index].abilityDamage, extraDamage: allChampions[index].extraDamage + additionalAbilityDamage, iteration: allChampions[index].abilityProjectileSpeed }
+
+                  // Check for critical chance on abilities
+                  const randomValue = Math.random();
+                  var abilityCriticalDamage = 0;
+                  if (randomValue < allChampions[index].criticalChance && allChampions[index].abilityCrit) {
+                    abilityCriticalDamage = allChampions[index].criticalDamage;
+                  }
+
+                  const newProjectile = { type: 'ability', damage: allChampions[index].abilityDamage + allChampions[index].abilityDamage * abilityCriticalDamage, extraDamage: allChampions[index].extraDamage + additionalAbilityDamage, iteration: allChampions[index].abilityProjectileSpeed }
                   const newProjectileList = [ ...closestEnemy.projectiles, newProjectile ];
                   allChampions[closestEnemy.index] = { ...closestEnemy, projectiles: newProjectileList };
 

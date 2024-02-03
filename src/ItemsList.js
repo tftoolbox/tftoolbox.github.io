@@ -31,6 +31,10 @@ const items = {
     onAttackAbility: {}, oncePerCombat: {}, everyXSeconds: { type: 'archangelStaff', iteration: 5 * MOVEMENT_SPEED } },
   "Sterak's Gage": { image: "https://rerollcdn.com/items/ProtectorsVow.png", type: "Protector's Vow", flatStats: { mana: 30, armor: 20 }, percentStats: {}, description: "Once per combat at 40% Health, gain a 25% max Health shield that lasts up to 5 seconds and gain 20 Armor and Magic Resist.", 
     onAttackAbility: {}, oncePerCombat: { health: 0.6, type: [ { type: 'originalHealth', value: 0.2 }, { type: 'attackDamage', value: 0.35 } ] } },
+  "Infinity Edge": { image: "https://rerollcdn.com/items/DragonsClaw.png", type: "Dragon's Claw", flatStats: { abilityPower: 10 }, percentStats: { attackSpeed: 0.18 }, description: "Every 2 seconds, regenerate 10% maximum Health.", 
+    onAttackAbility: {}, oncePerCombat: {}, everyXSeconds: {} },
+  "Jeweled Gauntlet": { image: "https://rerollcdn.com/items/DragonsClaw.png", type: "Dragon's Claw", flatStats: { abilityPower: 10 }, percentStats: { attackSpeed: 0.18 }, description: "Every 2 seconds, regenerate 10% maximum Health.", 
+    onAttackAbility: {}, oncePerCombat: {}, everyXSeconds: {} },
 }
 
 function GetItemDetails(itemKey) {
@@ -80,6 +84,10 @@ function ItemsList(champion) {
         if (items[championItems[i]].constantThreshold.type === 'steadfastHeart') {
           newChampion = { ...newChampion, damageReduction: newChampion.damageReduction + 0.15 };
         }
+      }
+
+      if (items[championItems[i]].type === "Infinity Edge" || items[championItems[i]].type === "Jeweled Gauntlet") {
+        newChampion = { ...newChampion, abilityCrit: true };
       }
     }
   }
