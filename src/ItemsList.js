@@ -25,6 +25,8 @@ const items = {
   onAttackAbility: {}, oncePerCombat: {}, everyXSeconds: {}, basedOnTarget: {}, statusEffectOnAttack: { type: 'lastWhisper' } },
   "Steadfast Heart": { image: "https://rerollcdn.com/items/LastWhisper.png", type: "Giant Slayer", flatStats: { abilityPower: 10 }, percentStats: { attackSpeed: 0.18 }, description: "Take 8% less damage. While above 50% Health, take 15% less damage instead.", 
   onAttackAbility: {}, oncePerCombat: {}, everyXSeconds: {}, basedOnTarget: {}, statusEffectOnAttack: {}, constantThreshold: { type: 'steadfastHeart', baseState: true } },
+  "Rabadon's Deathcap": { image: "https://rerollcdn.com/items/LastWhisper.png", type: "Giant Slayer", flatStats: { damageExtra: 0.2 }, percentStats: {}, description: "Take 8% less damage. While above 50% Health, take 15% less damage instead.", 
+  onAttackAbility: {}, oncePerCombat: {}, everyXSeconds: {}, basedOnTarget: {}, statusEffectOnAttack: {}, constantThreshold: {} },
 }
 
 function GetItemDetails(itemKey) {
