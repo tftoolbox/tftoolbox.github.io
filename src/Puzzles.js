@@ -19,7 +19,7 @@ const puzzlesList = [
 	 ChampionsList([['Aphelios', 1, false, []], ["K\'Sante", 1, false, []], ['Yasuo', 2, false, []]], 'user')],
 	[ChampionsList([['Jinx', 2, false, []], ['Vi', 2, false, []], ['Kennen', 1, false, []]], 'enemy', [[2,0], [3, 3], [6,0]]),
 	 ChampionsList([['Tahm Kench', 2, false, []], ["K\'Sante", 1, false, []], ['Olaf', 2, false, []]], 'user')],
-	[ChampionsList([['Corki', 1, false, []], ['Olaf', 1, false, []], ['Tahm Kench', 2, false, ["Warmog\'s Armor"]]], 'enemy', [[6,0], [2, 3], [3,3]]),
+	[ChampionsList([['Corki', 1, false, []], ['Olaf', 1, false, []], ['Tahm Kench', 2, false, ["Warmog's Armor"]]], 'enemy', [[6,0], [2, 3], [3,3]]),
 	 ChampionsList([['Taric', 2, false, ["Chain Vest"]], ["Nami", 1, false, []], ['Yasuo', 1, false, []]], 'user')],
 	[ChampionsList([['Aphelios', 1, false, []], ['Jinx', 2, false, ["B.F. Sword"]], ['Vi', 2, false, []]], 'enemy', [[5,0], [6, 0], [4,3]]),
 	 ChampionsList([['Taric', 2, false, ["Chain Vest"]], ['Yasuo', 2, false, []], ['Nami', 1, false, []]], 'user')],

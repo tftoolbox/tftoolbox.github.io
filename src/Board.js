@@ -7,6 +7,7 @@ import Traits from './Traits';
 import Augments from './Augments';
 import ChampionDisplay from './ChampionDisplay';
 import { puzzlesList, Puzzles } from './Puzzles';
+import { MOVEMENT_SPEED } from './ChampionsList';
 
 const CIRCLE_DIAMETER = 50;
 const ITERATION_CYCLE = 50;
@@ -268,7 +269,6 @@ function Board({ enemyChampionsList, userChampionsList, initialPuzzleNumber }) {
   const [selectedChampion, setSelectedChampion] = useState(userChampionsList[0]);
   const [puzzleNumber, setPuzzleNumber] = useState(initialPuzzleNumber);
   // const [combatIteration, setCombatIteration] = useState(0); // will implement later for overtime
-  console.log(userChampions);
 
   function getRandomInt(max) {
     return Math.floor(Math.random() * max);
@@ -307,123 +307,333 @@ function Board({ enemyChampionsList, userChampionsList, initialPuzzleNumber }) {
       // console.log('before champions', allChampions);
   
       const updateChampionAtIndex = async (index) => {
-        const tempChampion = allChampions[index];
+        // Make sure that selected champion is actually found for purposes of champion display (when champion dies, stop displaying)
         var selectedChampionFound = false;
-
-        if ((tempChampion.team === selectedChampion.team) && (tempChampion.index === selectedChampion.index)) {
+        if ((allChampions[index].team === selectedChampion.team) && (allChampions[index].index === selectedChampion.index)) {
           selectedChampionFound = true;
         }
         
-        var allChampionsProjectileIteration = 0;
-        const allProjectiles = tempChampion.projectiles;
-        if (allProjectiles !== undefined & allProjectiles !== null & allProjectiles !== 0) {
-          for (const projectile of allProjectiles) {
-            if (projectile.iterations === 0) {
-              if ((allChampions[index].health - projectile.damage) <= 0) {
-                const newProjectiles = allChampions[index].projectiles.filter((_, index) => index !== allChampionsProjectileIteration);
-                allChampions[index] = { ...allChampions[index], alive: false, projectiles: newProjectiles };
-                console.log(`${tempChampion.type} of ${tempChampion.team} took ${projectile.damage} damage and died.`);
-                break;
-              } else {
-                const newHealth = allChampions[index].health - projectile.damage;
-                // if (projectile.effect !== null & projectile.effect.length !== 0) {
-                //   for (const effect in projectile.effect) {
-                //     if (effect.type === 'shred') {
-                      
-                //     }
-                //   }
-                // }
-                console.log(`${tempChampion.type} of ${tempChampion.team} took ${projectile.damage} damage.`);
-                if (tempChampion.mana === null) {
-                  const newProjectiles = allChampions[index].projectiles.filter((_, index) => index !== allChampionsProjectileIteration);
-                  allChampions[index] = { ...allChampions[index], health: newHealth, projectiles: newProjectiles };
-                } else {
-                  const newCurrentMana = Math.min(allChampions[index].totalMana, allChampions[index].mana + projectile.mana);
-                  const newProjectiles = allChampions[index].projectiles.filter((_, index) => index !== allChampionsProjectileIteration);
-                  allChampions[index] = { ...allChampions[index], health: newHealth, mana: newCurrentMana, projectiles: newProjectiles };
-                } 
-              }
+        // Iterating through all stats after checking there are stats
+        var allChampionsStatIteration = 0;
+        const allStats = allChampions[index].stats;
+
+        if (allStats !== undefined && allStats !== null) {
+          for (const stat of allStats) {
+            // When the stat has no more iterations left, remove it from the list of stats
+            if (stat.iteration === 0) {
+              const newStats = allChampions[index].stats.filter((_, index) => index !== allChampionsStatIteration);
+              allChampions[index] = { ...allChampions[index], stats: newStats };
+
             } else {
-              var newProjectiles = allChampions[index].projectiles;
-              const newProjectileIterations = projectile.iterations - 1;
-              newProjectiles[allChampionsProjectileIteration] = { ...projectile, iterations: newProjectileIterations }
-              allChampions[index] = { ...allChampions[index], projectiles: newProjectiles };
-              allChampionsProjectileIteration += 1;
+              // When stat still has iterations left, make sure that it is applied to the target stats
+              if (stat.type === 'shred') {
+                allChampions[index] = { ...allChampions[index], magicResist: Math.round(allChampions[index].originalMagicResist*stat.value) };
+
+              } else if (stat.type === 'sunder') {
+                allChampions[index] = { ...allChampions[index], armor: Math.round(allChampions[index].originalArmor*stat.value) };
+
+              } else if (stat.type === 'shield') {
+                // Want to only apply each shield once
+                if (!stat.applied) {
+                  allChampions[index] = { ...allChampions[index], shield: Math.round(allChampions[index].shield + stat.value) };
+                  allChampions[index].stats[allChampionsProjectileIteration] = { ...stat, applied: true }
+                }
+
+              } else if (stat.type === 'damageReduction') {
+                allChampions[index] = { ...allChampions[index], damageReduction: allChampions[index].damageReduction + stat.value };
+
+              } else if (stat.type === 'damageExtra') {
+                allChampions[index] = { ...allChampions[index], damageExtra: allChampions[index].damageExtra + stat.value };
+
+              } else {
+                // Throw an error if the stat is not implemented yet
+                throw new Error('This is a stat that is not implemented yet.');
+
+              }
+
+              // Remove one iteration for this stat and move onto next stat
+              allChampions[index].stats[allChampionsStatIteration] = { ...stat, iterations: stat.iteration - 1 }
+              allChampionsStatIteration += 1;
             }
           }
         }
-        const champion = allChampions[index];
 
+        // Iterating through all projectiles after checking there are projectiles
+        var allChampionsProjectileIteration = 0;
+        const allProjectiles = allChampions[index].projectiles;
+
+        if (allProjectiles !== undefined && allProjectiles !== null) {
+          for (const projectile of allProjectiles) {
+            if (projectile.iterations === 0) {
+              if (projectile.type === 'attack') {
+                // Calculate post-mitigation damage
+                const postMitigationAttackDamage = (1 - (allChampions[index].armor / (100 + allChampions[index].armor))) * projectile.damage * (1 - allChampions[index].damageReduction) * projectile.damageExtra;
+
+                // Check if there are oncePerCombat items to check with health thresholds
+                if (Object.keys(allChampions[index].oncePerCombat).length > 0) {
+                  // Check if this damage will activate any oncePerCombat items
+                  const thresholdHealth = Math.round(allChampions[index].oncePerCombat.health * allChampions[index].originalHealth);
+                  var updatedOncePerCombatAttack = [];
+
+                  // Iterate through each item that is once-per-combat
+                  for (const item in allChampions[index].oncePerCombat) {
+                    if (thresholdHealth <= postMitigationAttackDamage) {
+                      // Iterate through the different one-time stat boosts that can happen
+                      for (const typeValuePair in allChampions[index].oncePerCombat.type) {
+                        if (typeValuePair.type === 'armor') {
+                          allChampions[index] = { ...allChampions[index], armor: allChampions[index].armor + typeValuePair.value };
+  
+                        } else if (typeValuePair.type === 'magicResist') {
+                          allChampions[index] = { ...allChampions[index], magicResist: allChampions[index].magicResist + typeValuePair.value };
+  
+                        } else if (typeValuePair.type === 'maxHealth') {
+                          allChampions[index] = { ...allChampions[index], originalHealth: allChampions[index].originalHealth + typeValuePair.value, health: allChampions[index].health + typeValuePair.value };
+  
+                        } else if (typeValuePair.type === 'attackDamage') {
+                          allChampions[index] = { ...allChampions[index], attackDamage: Math.round(allChampions[index].attackDamage + allChampions[index].attackDamage * typeValuePair.value) };
+  
+                        } else if (typeValuePair.type === 'shield') {
+                          allChampions[index] = { ...allChampions[index], stats: [ ...allChampions[index].stats, { type: 'shield', value: Math.round(typeValuePair.value * allChampions[index].originalHealth), iteration: 5 * MOVEMENT_SPEED, applied: true } ] }; // Movement speed temporary as placeholder for one second
+                          allChampions[index] = { ...allChampions[index], shield: allChampions[index].shield + Math.round(typeValuePair.value * allChampions[index].originalHealth) };
+  
+                        } else {
+                          // Throw an error if the type is not implemented yet (later for untargetable on banshee's veil)
+                          throw new Error('This is a type of once-per-combat item that is not implemented yet.');
+  
+                        }
+                      }
+                    } else {
+                      // Otherwise, if not activated, continue to keep in once-per-combat
+                      updatedOncePerCombatAttack = [ ...updatedOncePerCombatAttack, item ];
+
+                    }
+                  }
+
+                  // Check if the damage will kill the champion or not
+                  if (allChampions[index].health + allChampions[index].shield <= postMitigationAttackDamage) {
+                    const newProjectiles = allChampions[index].projectiles.filter((_, index) => index !== allChampionsProjectileIteration);
+                    allChampions[index] = { ...allChampions[index], alive: false, projectiles: newProjectiles };
+                    // console.log(`${allChampions[index].type} of ${allChampions[index].team} took ${postMitigationAttackDamage} damage and died.`);
+                    break;
+
+                  } else {
+                    // Check if the champion has a shield
+                    if (allChampions[index].shield > 0) {
+                      const newShield = Math.max(0, allChampions[index].shield - postMitigationAttackDamage);
+                      allChampions[index] = { ...allChampions[index], shield: newShield };
+
+                    }
+
+                    // Find new mana and health for champion
+                    const newHealth = allChampions[index].health - postMitigationAttackDamage;
+                    const manaIncrement = Math.min(42.5, (0.01 * projectile.damage) + (0.07 * postMitigationAttackDamage));
+                    const newCurrentMana = Math.min(allChampions[index].totalMana, Math.round(allChampions[index].mana + manaIncrement))
+
+                    // Set projectiles to exclude this one
+                    if (allChampions[index].totalMana === 0) {
+                      const newProjectiles = allChampions[index].projectiles.filter((_, index) => index !== allChampionsProjectileIteration);
+                      allChampions[index] = { ...allChampions[index], health: newHealth, projectiles: newProjectiles };
+
+                    } else {
+                      const newProjectiles = allChampions[index].projectiles.filter((_, index) => index !== allChampionsProjectileIteration);
+                      allChampions[index] = { ...allChampions[index], health: newHealth, mana: newCurrentMana, projectiles: newProjectiles };
+
+                    } 
+                  }
+                  
+                  allChampions[index] = { ...allChampions[index], oncePerCombat: [] };
+                }
+              } else if (projectile.type === 'ability') {
+                // Calculate post-mitigation damage
+                const postMitigationAbilityDamage = (1 - (allChampions[index].magicResist / (100 + allChampions[index].magicResist))) * projectile.damage * (1 - allChampions[index].damageReduction) * projectile.damageExtra;
+
+                // Check if there are oncePerCombat items to check with health thresholds
+                if (Object.keys(allChampions[index].oncePerCombat).length > 0) {
+                  // Check if this damage will activate any oncePerCombat items
+                  const thresholdHealth = Math.round(allChampions[index].oncePerCombat.health * allChampions[index].originalHealth);
+                  var updatedOncePerCombatAbility = [];
+
+                  // Iterate through each item that is once-per-combat
+                  for (const item in allChampions[index].oncePerCombat) {
+                    if (thresholdHealth <= postMitigationAbilityDamage) {
+                      // Iterate through the different one-time stat boosts that can happen
+                      for (const typeValuePair in allChampions[index].oncePerCombat.type) {
+                        if (typeValuePair.type === 'armor') {
+                          allChampions[index] = { ...allChampions[index], armor: allChampions[index].armor + typeValuePair.value };
+  
+                        } else if (typeValuePair.type === 'magicResist') {
+                          allChampions[index] = { ...allChampions[index], magicResist: allChampions[index].magicResist + typeValuePair.value };
+  
+                        } else if (typeValuePair.type === 'maxHealth') {
+                          allChampions[index] = { ...allChampions[index], originalHealth: allChampions[index].originalHealth + typeValuePair.value, health: allChampions[index].health + typeValuePair.value };
+  
+                        } else if (typeValuePair.type === 'attackDamage') {
+                          allChampions[index] = { ...allChampions[index], attackDamage: Math.round(allChampions[index].attackDamage + allChampions[index].attackDamage * typeValuePair.value) };
+  
+                        } else if (typeValuePair.type === 'shield') {
+                          allChampions[index] = { ...allChampions[index], stats: [ ...allChampions[index].stats, { type: 'shield', value: Math.round(typeValuePair.value * allChampions[index].originalHealth), iteration: 5 * MOVEMENT_SPEED, applied: true } ] }; // Movement speed temporary as placeholder for one second
+                          allChampions[index] = { ...allChampions[index], shield: allChampions[index].shield + Math.round(typeValuePair.value * allChampions[index].originalHealth) };
+  
+                        } else {
+                          // Throw an error if the type is not implemented yet (later for untargetable on banshee's veil)
+                          throw new Error('This is a type of once-per-combat item that is not implemented yet.');
+  
+                        }
+                      }
+                    } else {
+                      // Otherwise, if not activated, continue to keep in once-per-combat
+                      updatedOncePerCombatAbility = [ ...updatedOncePerCombatAbility, item ];
+
+                    }
+                  }
+
+                  // Check if the damage will kill the champion or not
+                  if (allChampions[index].health + allChampions[index].shield <= postMitigationAbilityDamage) {
+                    const newProjectiles = allChampions[index].projectiles.filter((_, index) => index !== allChampionsProjectileIteration);
+                    allChampions[index] = { ...allChampions[index], alive: false, projectiles: newProjectiles };
+                    // console.log(`${allChampions[index].type} of ${allChampions[index].team} took ${postMitigationAbilityDamage} damage and died.`);
+                    break;
+
+                  } else {
+                    // Check if the champion has a shield
+                    if (allChampions[index].shield > 0) {
+                      const newShield = Math.max(0, allChampions[index].shield - postMitigationAbilityDamage);
+                      allChampions[index] = { ...allChampions[index], shield: newShield };
+
+                    }
+
+                    // Find new mana and health for champion
+                    const newHealth = allChampions[index].health - postMitigationAbilityDamage;
+                    const manaIncrement = Math.min(42.5, (0.01 * projectile.damage) + (0.07 * postMitigationAbilityDamage));
+                    const newCurrentMana = Math.min(allChampions[index].totalMana, Math.round(allChampions[index].mana + manaIncrement))
+
+                    // Set projectiles to exclude this one
+                    if (allChampions[index].totalMana === 0) {
+                      const newProjectiles = allChampions[index].projectiles.filter((_, index) => index !== allChampionsProjectileIteration);
+                      allChampions[index] = { ...allChampions[index], health: newHealth, projectiles: newProjectiles };
+
+                    } else {
+                      const newProjectiles = allChampions[index].projectiles.filter((_, index) => index !== allChampionsProjectileIteration);
+                      allChampions[index] = { ...allChampions[index], health: newHealth, mana: newCurrentMana, projectiles: newProjectiles };
+
+                    } 
+                  }
+                  
+                  allChampions[index] = { ...allChampions[index], oncePerCombat: [] };
+                }
+              } else if (projectile.type === 'item') {
+                // Throw an error if the projectile is not implemented yet (later for statik shiv, runaan's, etc.)
+                throw new Error('This is a projectile that is not implemented yet.');
+
+              } else {
+                // Throw an error if the projectile is not implemented yet
+                throw new Error('This is a projectile that is not implemented yet.');
+
+              }
+            } else {
+              // Remove one iteration for this projectile and move on to next projectile
+              allChampions[index].projectiles[allChampionsProjectileIteration] = { ...projectile, iterations: projectile.iterations - 1 };
+              allChampionsProjectileIteration += 1;
+
+            }
+          }
+        }
+
+        // Check for the champion being alive
         if (allChampions[index].alive) {
-          const isUserChampion = champion.team === 'user';
-          const closestEnemy = isUserChampion ? findClosestEnemy(champion, enemyChampions) : findClosestEnemy(champion, userChampions);
+          // Find the closest enemy/user to the champion
+          const isUserChampion = allChampions[index].team === 'user';
+          const closestEnemy = isUserChampion ? findClosestEnemy(allChampions[index], enemyChampions) : findClosestEnemy(allChampions[index], userChampions);
     
+          // Check if a closest enemy exists
           if (closestEnemy) {
-            const shortestPath = findShortestPath(allChampions, champion, closestEnemy, champion.attackRange);
+            const shortestPath = findShortestPath(allChampions, allChampions[index], closestEnemy, allChampions[index].attackRange);
             // console.log('shortest path', shortestPath);
     
+            // Check if a shortest path exists
             if (shortestPath && shortestPath.length > 1) {
               const targetHexagon = shortestPath[1];
               const targetPixelLeft = convertToPixels(targetHexagon[0], 'left', targetHexagon[1] % 2 === 1) - 25;
               const targetPixelTop = convertToPixels(targetHexagon[1], 'top', targetHexagon[1] % 2 === 1) - 25;
     
-              if (champion.iterationsRemaining.move === 0) {
-                const newIterationsRemaining = { ...champion.iterationsRemaining, move: champion.movementSpeed };
+              // See if you need to move to get to the nearest enemy/user
+              if (allChampions[index].iterationsRemaining.move === 0) {
+                const newIterationsRemaining = { ...allChampions[index].iterationsRemaining, move: allChampions[index].movementSpeed };
                 allChampions[index] = {
-                  ...champion,
+                  ...allChampions[index],
                   hexagonPosition: { left: targetHexagon[0], top: targetHexagon[1] },
                   currentPosition: { left: targetPixelLeft, top: targetPixelTop },
                   iterationsRemaining: newIterationsRemaining, 
                 };
-                console.log(`${champion.type} of ${champion.team} moved.`);
+                // console.log(`${allChampions[index].type} of ${allChampions[index].team} moved.`);
+
               } else {
-                const newIterationsRemaining = { ...champion.iterationsRemaining, move: champion.iterationsRemaining.move - 1 };
+                const newIterationsRemaining = { ...allChampions[index].iterationsRemaining, move: allChampions[index].iterationsRemaining.move - 1 };
                 allChampions[index] = {
-                  ...champion,
+                  ...allChampions[index],
                   iterationsRemaining: newIterationsRemaining, 
                 };
+
               }
     
               // console.log('updated champion', allChampions[index]);
             } else {
-              if (champion.totalMana === 0 | champion.mana < champion.totalMana) {
-                if (champion.iterationsRemaining.attack === 0) {
-                  const postMitigationAttackDamage = (1 - (closestEnemy.armor / (100 + closestEnemy.armor))) * champion.attackDamage;
-                  const manaIncrement = Math.min(42.5, (0.01 * champion.attackDamage) + (0.07 * postMitigationAttackDamage))
-                  var newCurrentMana = Math.min(closestEnemy.totalMana, closestEnemy.mana + manaIncrement)
-                  const newProjectile = { damage: postMitigationAttackDamage, mana: newCurrentMana, iterations: champion.attackProjectileSpeed, effect: [] }
-                  const newProjectileList = [...closestEnemy.projectiles, newProjectile];
+              // Check if not at casting an ability yet
+              if (allChampions[index].totalMana === 0 | allChampions[index].mana < allChampions[index].totalMana) {
+                // If ready to cast an ability next
+                if (allChampions[index].iterationsRemaining.attack === 0) {
+                  const newProjectile = { type: 'attack', damage: allChampions[index].attackDamage, extraDamage: allChampions[index].extraDamage, iteration: allChampions[index].attackProjectileSpeed }
+                  const newProjectileList = [ ...closestEnemy.projectiles, newProjectile ];
                   allChampions[closestEnemy.index] = { ...closestEnemy, projectiles: newProjectileList };
 
-                  newCurrentMana = Math.min(champion.totalMana, champion.mana + 10);
-                  const newIterationsRemaining = { ...champion.iterationsRemaining, attack: champion.attackSpeed };
-                  allChampions[index] = { ...champion, mana: newCurrentMana, iterationsRemaining: newIterationsRemaining };
-                  console.log(`${champion.type} of ${champion.team} fired an attack to ${closestEnemy.type}.`);
+                  // Check if there needs to be changes due to on-attack items
+                  for (const item of allChampions[index].items) {
+                    if (Object.keys(item.onAttackAbility).length > 0) {
+                      for (const [key, value] of Object.entries(item.onAttackAbility)) {
+                        if (key !== 'attackSpeed' & key !== 'attackDamage') {
+                          if (key === 'mana') {
+                            allChampions[index] = { ...allChampions[index], [key]: Math.min(allChampions[index].totalMana, Math.round(allChampions[index][key] + value)) };
+                          }
+                        } else {
+                          allChampions[index] = { ...allChampions[index], [key]: Math.round(allChampions[index][key] + allChampions[index][key] * value) };
+                        }
+                      }
+                    }
+                  }
+
+                  const newCurrentMana = Math.min(allChampions[index].totalMana, allChampions[index].mana + 10);
+                  const newIterationsRemaining = { ...allChampions[index].iterationsRemaining, attack: allChampions[index].attackSpeed };
+                  allChampions[index] = { ...allChampions[index], mana: newCurrentMana, iterationsRemaining: newIterationsRemaining };
+                  // console.log(`${allChampions[index].type} of ${allChampions[index].team} fired an attack to ${closestEnemy.type}.`);
+
                 } else {
-                  const newIterationsRemaining = { ...champion.iterationsRemaining, attack: champion.iterationsRemaining.attack - 1 };
+                  // Reduce iterations until casting next attack by 1
+                  const newIterationsRemaining = { ...allChampions[index].iterationsRemaining, attack: allChampions[index].iterationsRemaining.attack - 1 };
                   allChampions[index] = {
-                    ...champion,
+                    ...allChampions[index],
                     iterationsRemaining: newIterationsRemaining, 
                   };
+
                 }
-              } else if (champion.mana >= champion.totalMana) {
-                if (champion.iterationsRemaining.ability === 0) {
-                  const postMitigationAbilityDamage = (1 - (closestEnemy.magicResist / (100 + closestEnemy.magicResist))) * champion.abilityPower;
-                  const manaIncrement = Math.min(42.5, (0.01 * champion.attackDamage) + (0.07 * postMitigationAbilityDamage))
-                  const newCurrentMana = Math.min(closestEnemy.totalMana, closestEnemy.mana + manaIncrement)
-                  const newProjectile = { damage: postMitigationAbilityDamage, mana: newCurrentMana, iterations: champion.abilityProjectileSpeed, effect: [{ type: 'shred', iterations: 60, strength: 0.3 }] }
-                  const newProjectileList = [...closestEnemy.projectiles, newProjectile];
+              } else if (allChampions[index].mana >= allChampions[index].totalMana) {
+                // Check if ready to cast an ability
+                if (allChampions[index].iterationsRemaining.ability === 0) {
+                  const newProjectile = { type: 'ability', damage: allChampions[index].abilityDamage, extraDamage: allChampions[index].extraDamage, iteration: allChampions[index].abilityProjectileSpeed }
+                  const newProjectileList = [ ...closestEnemy.projectiles, newProjectile ];
                   allChampions[closestEnemy.index] = { ...closestEnemy, projectiles: newProjectileList };
 
-                  const newIterationsRemaining = { ...champion.iterationsRemaining, ability: champion.abilityCastTime };
-                  allChampions[index] = { ...champion, mana: 0, iterationsRemaining: newIterationsRemaining };
-                  console.log(`${champion.type} of ${champion.team} fired an ability to ${closestEnemy.type}.`);
+                  const newIterationsRemaining = { ...allChampions[index].iterationsRemaining, ability: allChampions[index].abilityCastTime };
+                  allChampions[index] = { ...allChampions[index], mana: 0, iterationsRemaining: newIterationsRemaining };
+                  // console.log(`${allChampions[index].type} of ${allChampions[index].team} fired an ability to ${closestEnemy.type}.`);
+
                 } else {  
-                  const newIterationsRemaining = { ...champion.iterationsRemaining, ability: champion.iterationsRemaining.ability - 1 };
+                  // Reduce iterations until casting next ability by 1
+                  const newIterationsRemaining = { ...allChampions[index].iterationsRemaining, ability: allChampions[index].iterationsRemaining.ability - 1 };
                   allChampions[index] = {
-                    ...champion,
+                    ...allChampions[index],
                     iterationsRemaining: newIterationsRemaining, 
                   };
+
                 }
               }
             }

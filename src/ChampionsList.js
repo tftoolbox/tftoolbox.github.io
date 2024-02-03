@@ -264,4 +264,4 @@ function ChampionsList(championList, team, enemyPositions=[]) {
 }
 
 export default ChampionsList;
-export { ATTACK_SPEED };
+export { ATTACK_SPEED, MOVEMENT_SPEED };
