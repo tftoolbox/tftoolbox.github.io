@@ -417,8 +417,8 @@ function Board({ enemyChampionsList, userChampionsList, initialPuzzleNumber }) {
                         } else if (statBoost.type === 'magicResist') {
                           allChampions[index] = { ...allChampions[index], magicResist: allChampions[index].magicResist + statBoost.value };
   
-                        } else if (statBoost.type === 'maxHealth') {
-                          allChampions[index] = { ...allChampions[index], originalHealth: allChampions[index].originalHealth + statBoost.value, health: allChampions[index].health + statBoost.value };
+                        } else if (statBoost.type === 'originalHealth') {
+                          allChampions[index] = { ...allChampions[index], originalHealth: allChampions[index].originalHealth + allChampions[index].originalHealth * statBoost.value, health: allChampions[index].health + allChampions[index].originalHealth * statBoost.value };
   
                         } else if (statBoost.type === 'attackDamage') {
                           allChampions[index] = { ...allChampions[index], attackDamage: Math.round(allChampions[index].attackDamage + allChampions[index].attackDamage * statBoost.value) };
