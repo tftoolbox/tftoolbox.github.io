@@ -326,6 +326,27 @@ function Board({ enemyChampionsList, userChampionsList, initialPuzzleNumber }) {
                 allChampions[index].stats[allChampionsStatIteration] = { ...stat, iteration: 2 * MOVEMENT_SPEED };
                 
               } else {
+                // When stat has no iterations left, return back to base
+                if (stat.type === 'shred') {
+                  allChampions[index] = { ...allChampions[index], magicResist: allChampions[index].originalMagicResist };
+
+                } else if (stat.type === 'sunder') {
+                  allChampions[index] = { ...allChampions[index], armor: allChampions[index].originalArmor };
+
+                } else if (stat.type === 'shield') {
+                  // No clue how to get rid of each shield - tbd
+
+                } else if (stat.type === 'damageReduction') {
+                  allChampions[index] = { ...allChampions[index], damageReduction: allChampions[index].damageReduction - stat.value };
+
+                } else if (stat.type === 'damageExtra') {
+                  allChampions[index] = { ...allChampions[index], damageExtra: allChampions[index].damageExtra - stat.value };
+
+                } else {
+                  // Throw an error if the stat is not implemented yet
+                  throw new Error('This is a stat that is not implemented yet.');
+
+                }
                 const newStats = allChampions[index].stats.filter((_, index) => index !== allChampionsStatIteration);
                 allChampions[index] = { ...allChampions[index], stats: newStats };
 
@@ -333,10 +354,10 @@ function Board({ enemyChampionsList, userChampionsList, initialPuzzleNumber }) {
             } else {
               // When stat still has iterations left, make sure that it is applied to the target stats
               if (stat.type === 'shred') {
-                allChampions[index] = { ...allChampions[index], magicResist: Math.round(allChampions[index].originalMagicResist*stat.value) };
+                allChampions[index] = { ...allChampions[index], magicResist: Math.round(allChampions[index].originalMagicResist*(1 - stat.value)) };
 
               } else if (stat.type === 'sunder') {
-                allChampions[index] = { ...allChampions[index], armor: Math.round(allChampions[index].originalArmor*stat.value) };
+                allChampions[index] = { ...allChampions[index], armor: Math.round(allChampions[index].originalArmor*(1 - stat.value)) };
 
               } else if (stat.type === 'shield') {
                 // Want to only apply each shield once
@@ -436,6 +457,21 @@ function Board({ enemyChampionsList, userChampionsList, initialPuzzleNumber }) {
                     const newHealth = allChampions[index].health - postMitigationAttackDamage;
                     const manaIncrement = Math.min(42.5, (0.01 * projectile.damage) + (0.07 * postMitigationAttackDamage));
                     const newCurrentMana = Math.min(allChampions[index].totalMana, Math.round(allChampions[index].mana + manaIncrement))
+
+                    // Find any stat effects from projectile
+                    if (projectile.hasOwnProperty('effect')) {
+                      for (const effect of projectile.effect) {
+                        if (effect.type === 'lastWhisper') {
+                          if (allChampions[index].armor < allChampions[index].originalArmor) {
+                            if (allChampions[index].armor + Math.round(allChampions[index].originalArmor * 0.3) <= allChampions[index].originalArmor) {
+                              allChampions[index].stats = [ ...allChampions[index].stats, { type: 'sunder', value: 0.3, iteration: 3 * MOVEMENT_SPEED } ];
+                            }
+                          } else {
+                            allChampions[index].stats = [ ...allChampions[index].stats, { type: 'sunder', value: 0.3, iteration: 3 * MOVEMENT_SPEED } ];
+                          }
+                        }
+                      }
+                    }
 
                     // Set projectiles to exclude this one
                     if (allChampions[index].totalMana === 0) {

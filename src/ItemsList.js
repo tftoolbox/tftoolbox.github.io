@@ -21,6 +21,10 @@ const items = {
   onAttackAbility: {}, oncePerCombat: {}, everyXSeconds: { type: 'dragonClaw', iteration: 2 * MOVEMENT_SPEED } },
   "Giant Slayer": { image: "https://rerollcdn.com/items/GiantSlayer.png", type: "Giant Slayer", flatStats: { abilityPower: 10 }, percentStats: { attackSpeed: 0.18 }, description: "Every 2 seconds, regenerate 10% maximum Health.", 
   onAttackAbility: {}, oncePerCombat: {}, everyXSeconds: {}, basedOnTarget: { type: 'giantSlayer' } },
+  "Last Whisper": { image: "https://rerollcdn.com/items/LastWhisper.png", type: "Giant Slayer", flatStats: { abilityPower: 10 }, percentStats: { attackSpeed: 0.18 }, description: "Physical damage 30% Sunders the target for 3 seconds. This effect does not stack.", 
+  onAttackAbility: {}, oncePerCombat: {}, everyXSeconds: {}, basedOnTarget: {}, statusEffectOnAttack: { type: 'lastWhisper' } },
+  "Steadfast Heart": { image: "https://rerollcdn.com/items/LastWhisper.png", type: "Giant Slayer", flatStats: { abilityPower: 10 }, percentStats: { attackSpeed: 0.18 }, description: "Take 8% less damage. While above 50% Health, take 15% less damage instead.", 
+  onAttackAbility: {}, oncePerCombat: {}, everyXSeconds: {}, basedOnTarget: {}, statusEffectOnAttack: {}, constantThreshold: {} },
 }
 
 function GetItemDetails(itemKey) {
@@ -45,12 +49,29 @@ function ItemsList(champion) {
         newChampion = { ...newChampion, [key]: Math.round(newChampion[key] + newChampion[key] * value) };
       }
 
+      if (Object.keys(items[championItems[i]].oncePerCombat).length > 0) {
+        newChampion = { ...newChampion, oncePerCombat: [ ...newChampion.oncePerCombat, items[championItems[i]].oncePerCombat ] };
+      }
+
+      if (Object.keys(items[championItems[i]].basedOnTarget).length > 0) {
+        newChampion = { ...newChampion, basedOnTarget: [ ...newChampion.basedOnTarget, items[championItems[i]].basedOnTarget ] };
+      }
+
+      if (Object.keys(items[championItems[i]].onAttackAbility).length > 0) {
+        newChampion = { ...newChampion, onAttackAbility: [ ...newChampion.onAttackAbility, items[championItems[i]].onAttackAbility ] };
+      }
+
       if (Object.keys(items[championItems[i]].everyXSeconds).length > 0) {
         newChampion = { ...newChampion, stats: [ ...newChampion.stats, items[championItems[i]].everyXSeconds ] };
       }
 
-      newChampion = { ...newChampion, oncePerCombat: [ ...newChampion.oncePerCombat, items[championItems[i]].oncePerCombat ], basedOnTarget: [ ...newChampion.basedOnTarget, items[championItems[i]].basedOnTarget ],
-        onAttackAbility: [ ...newChampion.onAttackAbility, items[championItems[i]].onAttackAbility ] };
+      if (Object.keys(items[championItems[i]].statusEffectOnAttack).length > 0) {
+        newChampion = { ...newChampion, statusEffectOnAttack: [ ...newChampion.statusEffectOnAttack, items[championItems[i]].statusEffectOnAttack ] };
+      }
+
+      if (Object.keys(items[championItems[i]].constantThreshold).length > 0) {
+        newChampion = { ...newChampion, constantThreshold: [ ...newChampion.constantThreshold, items[championItems[i]].constantThreshold ] };
+      }
     }
   }
 
