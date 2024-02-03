@@ -592,7 +592,20 @@ function Board({ enemyChampionsList, userChampionsList, initialPuzzleNumber }) {
               if (allChampions[index].totalMana === 0 | allChampions[index].mana < allChampions[index].totalMana) {
                 // If ready to cast an ability next
                 if (allChampions[index].iterationsRemaining.attack === 0) {
-                  const newProjectile = { type: 'attack', damage: allChampions[index].attackDamage, extraDamage: allChampions[index].extraDamage, iteration: allChampions[index].attackProjectileSpeed }
+                  // Check for based-on-target item enhancements
+                  var additionalAttackDamage = 0;
+                  if (allChampions[index].basedOnTarget.length > 0) {
+                    for (const item of allChampions[index].basedOnTarget) {
+                      if (item.type === 'giantSlayer') {
+                        if (closestEnemy.originalHealth > 1600) {
+                          additionalAttackDamage = 0.25;
+
+                        }
+                      }
+                    }
+                  }
+
+                  const newProjectile = { type: 'attack', damage: allChampions[index].attackDamage, extraDamage: allChampions[index].extraDamage + additionalAttackDamage, iteration: allChampions[index].attackProjectileSpeed }
                   const newProjectileList = [ ...closestEnemy.projectiles, newProjectile ];
                   allChampions[closestEnemy.index] = { ...closestEnemy, projectiles: newProjectileList };
 
@@ -628,7 +641,19 @@ function Board({ enemyChampionsList, userChampionsList, initialPuzzleNumber }) {
               } else if (allChampions[index].mana >= allChampions[index].totalMana) {
                 // Check if ready to cast an ability
                 if (allChampions[index].iterationsRemaining.ability === 0) {
-                  const newProjectile = { type: 'ability', damage: allChampions[index].abilityDamage, extraDamage: allChampions[index].extraDamage, iteration: allChampions[index].abilityProjectileSpeed }
+                  // Check for based-on-target item enhancements
+                  var additionalAbilityDamage = 0;
+                  if (allChampions[index].basedOnTarget.length > 0) {
+                    for (const item of allChampions[index].basedOnTarget) {
+                      if (item.type === 'giantSlayer') {
+                        if (closestEnemy.originalHealth > 1600) {
+                          additionalAbilityDamage = 0.25;
+
+                        }
+                      }
+                    }
+                  }
+                  const newProjectile = { type: 'ability', damage: allChampions[index].abilityDamage, extraDamage: allChampions[index].extraDamage + additionalAbilityDamage, iteration: allChampions[index].abilityProjectileSpeed }
                   const newProjectileList = [ ...closestEnemy.projectiles, newProjectile ];
                   allChampions[closestEnemy.index] = { ...closestEnemy, projectiles: newProjectileList };
 
