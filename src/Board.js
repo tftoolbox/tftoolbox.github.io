@@ -610,6 +610,21 @@ function Board({ enemyChampionsList, userChampionsList, initialPuzzleNumber }) {
                   allChampions[closestEnemy.index] = { ...closestEnemy, projectiles: newProjectileList };
 
                   // Check if there needs to be changes due to on-attack items
+                  if (allChampions[index].onAttackAbility.length > 0) {
+                    for (const item of allChampions[index].onAttackAbility) {
+                      if (item.type === 'mana') {
+                        allChampions[index] = { ...allChampions[index], mana: Math.min(allChampions[index].totalMana, Math.round(allChampions[index].mana + item.value)) };
+
+                      } else if (item.type === 'attackSpeed') {
+                        allChampions[index] = { ...allChampions[index], attackSpeed: Math.round(allChampions[index].attackSpeed + allChampions[index].attackSpeed * item.value) };
+
+                      } else {
+                        // Throw an error if the projectile is not implemented yet
+                        throw new Error('This type of on-attack item is not implemented yet.');
+
+                      }
+                    }
+                  }
                   for (const item of allChampions[index].items) {
                     if (Object.keys(item.onAttackAbility).length > 0) {
                       for (const [key, value] of Object.entries(item.onAttackAbility)) {

@@ -242,17 +242,17 @@ function ChampionsList(championList, team, enemyPositions=[]) {
       if (starLevel === 1) {
         const newChampion = { ...champion, index: i, team: team, hexagonPosition: { left: column, top: row }, currentPosition: { left: convertToPixels(column, 'left', row%2 === 1) - 25, top: convertToPixels(row, 'top', row%2 === 1) - 25 }, 
                           items: items, headliner: headliner, starLevel: starLevel, health: champion.oneStarHealth, originalHealth: champion.oneStarHealth, attackDamage: champion.oneStarAD, originalMagicResist: champion.magicResist,
-                          originalArmor: champion.armor, shield: 0, damageReduction: 0, damageExtra: 0, oncePerCombat: [], basedOnTarget: [] };
+                          originalArmor: champion.armor, shield: 0, damageReduction: 0, damageExtra: 0, oncePerCombat: [], basedOnTarget: [], onAttackAbility: [] };
         returnList.push(ItemsList(newChampion));
       } else if (starLevel === 2) {
         const newChampion = { ...champion, index: i, team: team, hexagonPosition: { left: column, top: row }, currentPosition: { left: convertToPixels(column, 'left', row%2 === 1) - 25, top: convertToPixels(row, 'top', row%2 === 1) - 25 }, 
                           items: items, headliner: headliner, starLevel: starLevel, health: champion.twoStarHealth, originalHealth: champion.twoStarHealth, attackDamage: champion.twoStarAD, originalMagicResist: champion.magicResist,
-                          originalArmor: champion.armor, shield: 0, damageReduction: 0, damageExtra: 0, oncePerCombat: [], basedOnTarget: [] };
+                          originalArmor: champion.armor, shield: 0, damageReduction: 0, damageExtra: 0, oncePerCombat: [], basedOnTarget: [], onAttackAbility: [] };
         returnList.push(ItemsList(newChampion));
       } else {
         const newChampion = { ...champion, index: i, team: team, hexagonPosition: { left: column, top: row }, currentPosition: { left: convertToPixels(column, 'left', row%2 === 1) - 25, top: convertToPixels(row, 'top', row%2 === 1) - 25 }, 
                           items: items, headliner: headliner, starLevel: starLevel, health: champion.threeStarHealth, originalHealth: champion.threeStarHealth, attackDamage: champion.threeStarAD, originalMagicResist: champion.magicResist,
-                          originalArmor: champion.armor, shield: 0, damageReduction: 0, damageExtra: 0, oncePerCombat: [], basedOnTarget: [] };
+                          originalArmor: champion.armor, shield: 0, damageReduction: 0, damageExtra: 0, oncePerCombat: [], basedOnTarget: [], onAttackAbility: [] };
         returnList.push(ItemsList(newChampion));
       }
   

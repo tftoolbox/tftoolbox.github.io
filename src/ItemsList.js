@@ -49,7 +49,8 @@ function ItemsList(champion) {
         newChampion = { ...newChampion, stats: [ ...newChampion.stats, items[championItems[i]].everyXSeconds ] };
       }
 
-      newChampion = { ...newChampion, oncePerCombat: [ ...newChampion.oncePerCombat, items[championItems[i]].oncePerCombat ], basedOnTarget: [ ...newChampion.basedOnTarget, items[championItems[i]].basedOnTarget ] };
+      newChampion = { ...newChampion, oncePerCombat: [ ...newChampion.oncePerCombat, items[championItems[i]].oncePerCombat ], basedOnTarget: [ ...newChampion.basedOnTarget, items[championItems[i]].basedOnTarget ],
+        onAttackAbility: [ ...newChampion.onAttackAbility, items[championItems[i]].onAttackAbility ] };
     }
   }
 
