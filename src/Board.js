@@ -321,9 +321,15 @@ function Board({ enemyChampionsList, userChampionsList, initialPuzzleNumber }) {
           for (const stat of allStats) {
             // When the stat has no more iterations left, remove it from the list of stats
             if (stat.iteration === 0) {
-              const newStats = allChampions[index].stats.filter((_, index) => index !== allChampionsStatIteration);
-              allChampions[index] = { ...allChampions[index], stats: newStats };
+              if (stat.type === 'dragonClaw') {
+                allChampions[index] = { ...allChampions[index], health: Math.round(allChampions[index].health + allChampions[index].originalHealth * 0.1) };
+                allChampions[index].stats[allChampionsStatIteration] = { ...stat, iteration: 2 * MOVEMENT_SPEED };
+                
+              } else {
+                const newStats = allChampions[index].stats.filter((_, index) => index !== allChampionsStatIteration);
+                allChampions[index] = { ...allChampions[index], stats: newStats };
 
+              }
             } else {
               // When stat still has iterations left, make sure that it is applied to the target stats
               if (stat.type === 'shred') {
@@ -336,7 +342,7 @@ function Board({ enemyChampionsList, userChampionsList, initialPuzzleNumber }) {
                 // Want to only apply each shield once
                 if (!stat.applied) {
                   allChampions[index] = { ...allChampions[index], shield: Math.round(allChampions[index].shield + stat.value) };
-                  allChampions[index].stats[allChampionsProjectileIteration] = { ...stat, applied: true }
+                  allChampions[index].stats[allChampionsStatIteration] = { ...stat, applied: true }
                 }
 
               } else if (stat.type === 'damageReduction') {
@@ -352,7 +358,7 @@ function Board({ enemyChampionsList, userChampionsList, initialPuzzleNumber }) {
               }
 
               // Remove one iteration for this stat and move onto next stat
-              allChampions[index].stats[allChampionsStatIteration] = { ...stat, iterations: stat.iteration - 1 }
+              allChampions[index].stats[allChampionsStatIteration] = { ...stat, iteration: stat.iteration - 1 }
               allChampionsStatIteration += 1;
             }
           }
@@ -364,37 +370,37 @@ function Board({ enemyChampionsList, userChampionsList, initialPuzzleNumber }) {
 
         if (allProjectiles !== undefined && allProjectiles !== null) {
           for (const projectile of allProjectiles) {
-            if (projectile.iterations === 0) {
+            if (projectile.iteration === 0) {
               if (projectile.type === 'attack') {
                 // Calculate post-mitigation damage
                 const postMitigationAttackDamage = (1 - (allChampions[index].armor / (100 + allChampions[index].armor))) * projectile.damage * (1 - allChampions[index].damageReduction) * projectile.damageExtra;
 
                 // Check if there are oncePerCombat items to check with health thresholds
-                if (Object.keys(allChampions[index].oncePerCombat).length > 0) {
+                if (allChampions[index].oncePerCombat.length > 0) {
                   // Check if this damage will activate any oncePerCombat items
                   const thresholdHealth = Math.round(allChampions[index].oncePerCombat.health * allChampions[index].originalHealth);
                   var updatedOncePerCombatAttack = [];
 
                   // Iterate through each item that is once-per-combat
-                  for (const item in allChampions[index].oncePerCombat) {
+                  for (const item of allChampions[index].oncePerCombat) {
                     if (thresholdHealth <= postMitigationAttackDamage) {
                       // Iterate through the different one-time stat boosts that can happen
-                      for (const typeValuePair in allChampions[index].oncePerCombat.type) {
-                        if (typeValuePair.type === 'armor') {
-                          allChampions[index] = { ...allChampions[index], armor: allChampions[index].armor + typeValuePair.value };
+                      for (const statBoost of item.type) {
+                        if (statBoost.type === 'armor') {
+                          allChampions[index] = { ...allChampions[index], armor: allChampions[index].armor + statBoost.value };
   
-                        } else if (typeValuePair.type === 'magicResist') {
-                          allChampions[index] = { ...allChampions[index], magicResist: allChampions[index].magicResist + typeValuePair.value };
+                        } else if (statBoost.type === 'magicResist') {
+                          allChampions[index] = { ...allChampions[index], magicResist: allChampions[index].magicResist + statBoost.value };
   
-                        } else if (typeValuePair.type === 'maxHealth') {
-                          allChampions[index] = { ...allChampions[index], originalHealth: allChampions[index].originalHealth + typeValuePair.value, health: allChampions[index].health + typeValuePair.value };
+                        } else if (statBoost.type === 'maxHealth') {
+                          allChampions[index] = { ...allChampions[index], originalHealth: allChampions[index].originalHealth + statBoost.value, health: allChampions[index].health + statBoost.value };
   
-                        } else if (typeValuePair.type === 'attackDamage') {
-                          allChampions[index] = { ...allChampions[index], attackDamage: Math.round(allChampions[index].attackDamage + allChampions[index].attackDamage * typeValuePair.value) };
+                        } else if (statBoost.type === 'attackDamage') {
+                          allChampions[index] = { ...allChampions[index], attackDamage: Math.round(allChampions[index].attackDamage + allChampions[index].attackDamage * statBoost.value) };
   
-                        } else if (typeValuePair.type === 'shield') {
-                          allChampions[index] = { ...allChampions[index], stats: [ ...allChampions[index].stats, { type: 'shield', value: Math.round(typeValuePair.value * allChampions[index].originalHealth), iteration: 5 * MOVEMENT_SPEED, applied: true } ] }; // Movement speed temporary as placeholder for one second
-                          allChampions[index] = { ...allChampions[index], shield: allChampions[index].shield + Math.round(typeValuePair.value * allChampions[index].originalHealth) };
+                        } else if (statBoost.type === 'shield') {
+                          allChampions[index] = { ...allChampions[index], stats: [ ...allChampions[index].stats, { type: 'shield', value: Math.round(statBoost.value * allChampions[index].originalHealth), iteration: 5 * MOVEMENT_SPEED, applied: true } ] }; // Movement speed temporary as placeholder for one second
+                          allChampions[index] = { ...allChampions[index], shield: allChampions[index].shield + Math.round(statBoost.value * allChampions[index].originalHealth) };
   
                         } else {
                           // Throw an error if the type is not implemented yet (later for untargetable on banshee's veil)
@@ -408,6 +414,8 @@ function Board({ enemyChampionsList, userChampionsList, initialPuzzleNumber }) {
 
                     }
                   }
+                  
+                  allChampions[index] = { ...allChampions[index], updatedOncePerCombatAttack };
 
                   // Check if the damage will kill the champion or not
                   if (allChampions[index].health + allChampions[index].shield <= postMitigationAttackDamage) {
@@ -448,31 +456,31 @@ function Board({ enemyChampionsList, userChampionsList, initialPuzzleNumber }) {
                 const postMitigationAbilityDamage = (1 - (allChampions[index].magicResist / (100 + allChampions[index].magicResist))) * projectile.damage * (1 - allChampions[index].damageReduction) * projectile.damageExtra;
 
                 // Check if there are oncePerCombat items to check with health thresholds
-                if (Object.keys(allChampions[index].oncePerCombat).length > 0) {
+                if (allChampions[index].oncePerCombat.length > 0) {
                   // Check if this damage will activate any oncePerCombat items
                   const thresholdHealth = Math.round(allChampions[index].oncePerCombat.health * allChampions[index].originalHealth);
                   var updatedOncePerCombatAbility = [];
 
                   // Iterate through each item that is once-per-combat
-                  for (const item in allChampions[index].oncePerCombat) {
+                  for (const item of allChampions[index].oncePerCombat) {
                     if (thresholdHealth <= postMitigationAbilityDamage) {
                       // Iterate through the different one-time stat boosts that can happen
-                      for (const typeValuePair in allChampions[index].oncePerCombat.type) {
-                        if (typeValuePair.type === 'armor') {
-                          allChampions[index] = { ...allChampions[index], armor: allChampions[index].armor + typeValuePair.value };
+                      for (const statBoost of item.type) {
+                        if (statBoost.type === 'armor') {
+                          allChampions[index] = { ...allChampions[index], armor: allChampions[index].armor + statBoost.value };
   
-                        } else if (typeValuePair.type === 'magicResist') {
-                          allChampions[index] = { ...allChampions[index], magicResist: allChampions[index].magicResist + typeValuePair.value };
+                        } else if (statBoost.type === 'magicResist') {
+                          allChampions[index] = { ...allChampions[index], magicResist: allChampions[index].magicResist + statBoost.value };
   
-                        } else if (typeValuePair.type === 'maxHealth') {
-                          allChampions[index] = { ...allChampions[index], originalHealth: allChampions[index].originalHealth + typeValuePair.value, health: allChampions[index].health + typeValuePair.value };
+                        } else if (statBoost.type === 'maxHealth') {
+                          allChampions[index] = { ...allChampions[index], originalHealth: allChampions[index].originalHealth + statBoost.value, health: allChampions[index].health + statBoost.value };
   
-                        } else if (typeValuePair.type === 'attackDamage') {
-                          allChampions[index] = { ...allChampions[index], attackDamage: Math.round(allChampions[index].attackDamage + allChampions[index].attackDamage * typeValuePair.value) };
+                        } else if (statBoost.type === 'attackDamage') {
+                          allChampions[index] = { ...allChampions[index], attackDamage: Math.round(allChampions[index].attackDamage + allChampions[index].attackDamage * statBoost.value) };
   
-                        } else if (typeValuePair.type === 'shield') {
-                          allChampions[index] = { ...allChampions[index], stats: [ ...allChampions[index].stats, { type: 'shield', value: Math.round(typeValuePair.value * allChampions[index].originalHealth), iteration: 5 * MOVEMENT_SPEED, applied: true } ] }; // Movement speed temporary as placeholder for one second
-                          allChampions[index] = { ...allChampions[index], shield: allChampions[index].shield + Math.round(typeValuePair.value * allChampions[index].originalHealth) };
+                        } else if (statBoost.type === 'shield') {
+                          allChampions[index] = { ...allChampions[index], stats: [ ...allChampions[index].stats, { type: 'shield', value: Math.round(statBoost.value * allChampions[index].originalHealth), iteration: 5 * MOVEMENT_SPEED, applied: true } ] }; // Movement speed temporary as placeholder for one second
+                          allChampions[index] = { ...allChampions[index], shield: allChampions[index].shield + Math.round(statBoost.value * allChampions[index].originalHealth) };
   
                         } else {
                           // Throw an error if the type is not implemented yet (later for untargetable on banshee's veil)
@@ -486,6 +494,8 @@ function Board({ enemyChampionsList, userChampionsList, initialPuzzleNumber }) {
 
                     }
                   }
+                  
+                  allChampions[index] = { ...allChampions[index], updatedOncePerCombatAbility };
 
                   // Check if the damage will kill the champion or not
                   if (allChampions[index].health + allChampions[index].shield <= postMitigationAbilityDamage) {
@@ -532,7 +542,7 @@ function Board({ enemyChampionsList, userChampionsList, initialPuzzleNumber }) {
               }
             } else {
               // Remove one iteration for this projectile and move on to next projectile
-              allChampions[index].projectiles[allChampionsProjectileIteration] = { ...projectile, iterations: projectile.iterations - 1 };
+              allChampions[index].projectiles[allChampionsProjectileIteration] = { ...projectile, iteration: projectile.iteration - 1 };
               allChampionsProjectileIteration += 1;
 
             }

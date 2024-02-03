@@ -1,4 +1,4 @@
-import MOVEMENT_SPEED from './ChampionsList.js';
+import { MOVEMENT_SPEED } from './ChampionsList.js';
 
 const items = {
   'B.F. Sword': { image: "https://rerollcdn.com/items/BFSword.png", type: "B.F. Sword", flatStats: { attackDamage: 10 }, percentStats: {}, description: "10 Attack Damage." },
@@ -12,11 +12,15 @@ const items = {
   "Warmog's Armor": { image: "https://rerollcdn.com/items/WarmogsArmor.png", type: "Warmog's Armor", flatStats: { health: 800, originalHealth: 800 }, percentStats: {}, description: "800 Health." },
   "Deathblade": { image: "https://rerollcdn.com/items/Deathblade.png", type: "Deathblade", flatStats: {}, percentStats: { attackDamage: 0.66 }, description: "66% Attack Damage." },
   "Spear of Shojin": { image: "https://rerollcdn.com/items/SpearofShojin.png", type: "Spear of Shojin", flatStats: { mana: 15, abilityPower: 20 }, percentStats: { attackDamage: 0.20 }, description: "Attacks grant 5 bonus Mana.", 
-    onAttackAbility: { mana: 5 } },
+    onAttackAbility: { mana: 5 }, oncePerCombat: {} }, 
   "Guinsoo's Rageblade": { image: "https://rerollcdn.com/items/GuinsoosRageblade.png", type: "Guinsoo's Rageblade", flatStats: { abilityPower: 10 }, percentStats: { attackSpeed: 0.18 }, description: "Attacks grant 4% bonus Attack Speed.", 
-    onAttackAbility: { attackSpeed: 0.04 } },
+    onAttackAbility: { attackSpeed: 0.04 }, oncePerCombat: {} },
   "Protector's Vow": { image: "https://rerollcdn.com/items/ProtectorsVow.png", type: "Protector's Vow", flatStats: { mana: 30, armor: 20 }, percentStats: {}, description: "Once per combat at 40% Health, gain a 25% max Health shield that lasts up to 5 seconds and gain 20 Armor and Magic Resist.", 
-    onAttackAbility: {}, oncePerCombatHealth: { health: 0.4, flatStats: { armor: 20, magicResist: 20 }, percentStats: { shield: 0.25, shieldLength: MOVEMENT_SPEED*5 }, used: false } },
+    onAttackAbility: {}, oncePerCombat: { health: 0.4, type: [ { type: 'armor', value: 20 }, { type: 'magicResist', value: 20 }, { type: 'shield', value: 0.25 }] } },
+  "Dragon's Claw": { image: "https://rerollcdn.com/items/DragonsClaw.png", type: "Dragon's Claw", flatStats: { abilityPower: 10 }, percentStats: { attackSpeed: 0.18 }, description: "Every 2 seconds, regenerate 10% maximum Health.", 
+  onAttackAbility: {}, oncePerCombat: {}, everyXSeconds: { type: 'dragonClaw', iteration: 2 * MOVEMENT_SPEED } },
+  "Giant Slayer": { image: "https://rerollcdn.com/items/GiantSlayer.png", type: "Giant Slayer", flatStats: { abilityPower: 10 }, percentStats: { attackSpeed: 0.18 }, description: "Every 2 seconds, regenerate 10% maximum Health.", 
+  onAttackAbility: {}, oncePerCombat: {}, everyXSeconds: {}, basedOnTarget: { type: 'giantSlayer' } },
 }
 
 function GetItemDetails(itemKey) {
@@ -24,23 +28,29 @@ function GetItemDetails(itemKey) {
 }
 
 function ItemsList(champion) {
-  console.log(champion);
   var newChampion = champion;
   const championItems = champion.items;
 
   if (championItems.length > 0) {
-	for (var i = 0; i < championItems.length; i++) {
-		for (const [key, value] of Object.entries(items[championItems[i]].flatStats)) {
-      if (key === 'mana') {
-        newChampion = { ...newChampion, [key]: Math.min(newChampion.totalMana, Math.round(newChampion[key] + value)) };
-      } else {
-        newChampion = { ...newChampion, [key]: newChampion[key] + value };
+    for (var i = 0; i < championItems.length; i++) {
+      for (const [key, value] of Object.entries(items[championItems[i]].flatStats)) {
+        if (key === 'mana') {
+          newChampion = { ...newChampion, [key]: Math.min(newChampion.totalMana, Math.round(newChampion[key] + value)) };
+        } else {
+          newChampion = { ...newChampion, [key]: newChampion[key] + value };
+        }
       }
-		}
-		for (const [key, value] of Object.entries(items[championItems[i]].percentStats)) {
-			newChampion = { ...newChampion, [key]: Math.round(newChampion[key] + newChampion[key]*value) };
-		}
-	}
+
+      for (const [key, value] of Object.entries(items[championItems[i]].percentStats)) {
+        newChampion = { ...newChampion, [key]: Math.round(newChampion[key] + newChampion[key] * value) };
+      }
+
+      if (Object.keys(items[championItems[i]].everyXSeconds).length > 0) {
+        newChampion = { ...newChampion, stats: [ ...newChampion.stats, items[championItems[i]].everyXSeconds ] };
+      }
+
+      newChampion = { ...newChampion, oncePerCombat: [ ...newChampion.oncePerCombat, items[championItems[i]].oncePerCombat ], basedOnTarget: [ ...newChampion.basedOnTarget, items[championItems[i]].basedOnTarget ] };
+    }
   }
 
   return newChampion;
