@@ -37,6 +37,12 @@ const items = {
     onAttackAbility: {}, oncePerCombat: {}, everyXSeconds: {} },
   "Crownguard": { image: "https://rerollcdn.com/items/DragonsClaw.png", type: "Dragon's Claw", flatStats: { abilityPower: 10 }, percentStats: { attackSpeed: 0.18 }, description: "Every 2 seconds, regenerate 10% maximum Health.", 
     onAttackAbility: {}, oncePerCombat: {}, everyXSeconds: { type: 'crownguard', iteration: 8 * MOVEMENT_SPEED, applied: false } },
+  "Bloodthirster": { image: "https://rerollcdn.com/items/ProtectorsVow.png", type: "Protector's Vow", flatStats: { omnivamp: 0.2 }, percentStats: {}, description: "Once per combat at 40% Health, gain a 25% max Health shield that lasts up to 5 seconds and gain 20 Armor and Magic Resist.", 
+    onAttackAbility: {}, oncePerCombat: { health: 0.4, type: [ { type: 'shield', value: 0.25 } ] } },
+  "Hand Of Justice": { image: "https://rerollcdn.com/items/ProtectorsVow.png", type: "Protector's Vow", flatStats: { omnivamp: 0.2 }, percentStats: {}, description: "Once per combat at 40% Health, gain a 25% max Health shield that lasts up to 5 seconds and gain 20 Armor and Magic Resist.", 
+    onAttackAbility: {}, oncePerCombat: { health: 0.4, type: [ { type: 'shield', value: 0.25 } ] } },
+  "Guardbreaker": { image: "https://rerollcdn.com/items/ProtectorsVow.png", type: "Protector's Vow", flatStats: { omnivamp: 0.2 }, percentStats: {}, description: "Once per combat at 40% Health, gain a 25% max Health shield that lasts up to 5 seconds and gain 20 Armor and Magic Resist.", 
+    onAttackAbility: {}, oncePerCombat: { health: 0.4, type: [ { type: 'shield', value: 0.25 } ] } },
 }
 
 function GetItemDetails(itemKey) {
@@ -90,6 +96,19 @@ function ItemsList(champion) {
 
       if (items[championItems[i]].type === "Infinity Edge" || items[championItems[i]].type === "Jeweled Gauntlet") {
         newChampion = { ...newChampion, abilityCrit: true };
+      }
+
+      if (items[championItems[i]].type === "Hand Of Justice") {
+        const randomValue = Math.random();
+        if (randomValue < 0.5) {
+          newChampion = { ...newChampion, omnivamp: newChampion.omnivamp + 0.30, attackDamage: newChampion.attackDamage + newChampion.attackDamage * 0.15, abilityPower: newChampion.abilityPower + 15 };
+        } else {
+          newChampion = { ...newChampion, omnivamp: newChampion.omnivamp + 0.15, attackDamage: newChampion.attackDamage + newChampion.attackDamage * 0.30, abilityPower: newChampion.abilityPower + 30 };
+        }
+      }
+
+      if (items[championItems[i]].type === "Guardbreaker") {
+        newChampion = { ...newChampion, onShieldAttackProcItem: true };
       }
     }
   }

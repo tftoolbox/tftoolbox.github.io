@@ -268,6 +268,8 @@ function Board({ enemyChampionsList, userChampionsList, initialPuzzleNumber }) {
   const [isCombatActive, setCombatActive] = useState(0);
   const [selectedChampion, setSelectedChampion] = useState(userChampionsList[0]);
   const [puzzleNumber, setPuzzleNumber] = useState(initialPuzzleNumber);
+  const [enemyChampionsArchive, setEnemyChampionsArchive] = useState(enemyChampionsList);
+  const [userChampionsArchive, setUserChampionsArchive] = useState(userChampionsList);
   // const [combatIteration, setCombatIteration] = useState(0); // will implement later for overtime
 
   function getRandomInt(max) {
@@ -348,7 +350,10 @@ function Board({ enemyChampionsList, userChampionsList, initialPuzzleNumber }) {
 
                 } else if (stat.type === 'crownguard') {
                   allChampions[index] = { ...allChampions[index], abilityPower: allChampions[index].abilityPower + 35 };
-                  
+
+                } else if (stat.type === 'guardbreaker') {
+                  allChampions[index] = { ...allChampions[index], damageExtra: allChampions[index].damageExtra - stat.value, appliedGuardbreaker: false };
+
                 } else {
                   // Throw an error if the stat is not implemented yet
                   throw new Error('This is a stat that is not implemented yet.');
@@ -370,19 +375,33 @@ function Board({ enemyChampionsList, userChampionsList, initialPuzzleNumber }) {
                 // Want to only apply each shield once
                 if (!stat.applied) {
                   allChampions[index] = { ...allChampions[index], shield: Math.round(allChampions[index].originalHealth * 0.3) };
-                  allChampions[index].stats[allChampionsStatIteration] = { ...stat, applied: true }
+                  allChampions[index].stats[allChampionsStatIteration] = { ...stat, applied: true };
                 }
 
-              } else if (stat.type === 'damageReduction') {
-                allChampions[index] = { ...allChampions[index], damageReduction: allChampions[index].damageReduction + stat.value };
+              } 
+              // else if (stat.type === 'damageReduction') {
+              //   if (!stat.applied) {
+              //     allChampions[index] = { ...allChampions[index], damageReduction: allChampions[index].damageReduction + stat.value };
+              //     allChampions[index].stats[allChampionsStatIteration] = { ...stat, applied: true };
+              //   }
 
-              } else if (stat.type === 'damageExtra') {
-                allChampions[index] = { ...allChampions[index], damageExtra: allChampions[index].damageExtra + stat.value };
+              // } else if (stat.type === 'damageExtra') {
+              //   if (!stat.applied) {
+              //     allChampions[index] = { ...allChampions[index], damageExtra: allChampions[index].damageExtra + stat.value };
+              //     allChampions[index].stats[allChampionsStatIteration] = { ...stat, applied: true };
+              //   }
 
-              } else if (stat.type === 'crownguard') {
+              // } 
+              else if (stat.type === 'crownguard') {
                 if (!stat.applied) {
                   allChampions[index] = { ...allChampions[index], shield: Math.round(allChampions[index].shield + stat.value) };
                   allChampions[index].stats[allChampionsStatIteration] = { ...stat, applied: true }
+                }
+                
+              } else if (stat.type === 'guardbreaker') {
+                if (!stat.applied) {
+                  allChampions[index] = { ...allChampions[index], damageExtra: allChampions[index].damageExtra + stat.value };
+                  allChampions[index].stats[allChampionsStatIteration] = { ...stat, applied: true };
                 }
                 
               } else {
@@ -455,6 +474,19 @@ function Board({ enemyChampionsList, userChampionsList, initialPuzzleNumber }) {
                   if (allChampions[index].health + allChampions[index].shield <= postMitigationAttackDamage) {
                     const newProjectiles = allChampions[index].projectiles.filter((_, index) => index !== allChampionsProjectileIteration);
                     allChampions[index] = { ...allChampions[index], alive: false, projectiles: newProjectiles };
+
+                    // Account for omnivamp
+                    if (projectile.attacker.team === 'user') {
+                      const actualIndex = userChampionsArchive[projectile.attacker.specialIndex].index;
+                      if (allChampions[actualIndex].alive) {
+                        allChampions[actualIndex] = { ...allChampions[actualIndex], health: allChampions[actualIndex].health + Math.round(allChampions[actualIndex].omnivamp * (allChampions[index].health - allChampions[index].shield)) };
+                      }
+                    } else {
+                      const actualIndex = enemyChampionsArchive[projectile.attacker.specialIndex].index;
+                      if (allChampions[actualIndex].alive) {
+                        allChampions[actualIndex] = { ...allChampions[actualIndex], health: allChampions[actualIndex].health + Math.round(allChampions[actualIndex].omnivamp * (allChampions[index].health - allChampions[index].shield)) };
+                      }
+                    }
                     // console.log(`${allChampions[index].type} of ${allChampions[index].team} took ${postMitigationAttackDamage} damage and died.`);
                     break;
 
@@ -464,12 +496,37 @@ function Board({ enemyChampionsList, userChampionsList, initialPuzzleNumber }) {
                       const newShield = Math.max(0, allChampions[index].shield - postMitigationAttackDamage);
                       allChampions[index] = { ...allChampions[index], shield: newShield };
 
+                      // Account for guardbreaker
+                      if (projectile.attacker.team === 'user') {
+                        const actualIndex = userChampionsArchive[projectile.attacker.specialIndex].index;
+                        if (allChampions[actualIndex].alive && allChampions[actualIndex].onShieldAttackProcItem && !allChampions[actualIndex].appliedGuardbreaker) {
+                          allChampions[actualIndex] = { ...allChampions[actualIndex], appliedGuardbreaker: true, stats: [ ...allChampions[actualIndex].stats, { type: 'guardbreaker', value: 0.25, iteration: 3 * MOVEMENT_SPEED }] };
+                        }
+                      } else {
+                        const actualIndex = userChampionsArchive[projectile.attacker.specialIndex].index;
+                        if (allChampions[actualIndex].alive && allChampions[actualIndex].onShieldAttackProcItem && !allChampions[actualIndex].appliedGuardbreaker) {
+                          allChampions[actualIndex] = { ...allChampions[actualIndex], appliedGuardbreaker: true, stats: [ ...allChampions[actualIndex].stats, { type: 'guardbreaker', value: 0.25, iteration: 3 * MOVEMENT_SPEED }] };
+                        }
+                      }
                     }
 
                     // Find new mana and health for champion
                     const newHealth = allChampions[index].health - postMitigationAttackDamage;
                     const manaIncrement = Math.min(42.5, (0.01 * projectile.damage) + (0.07 * postMitigationAttackDamage));
-                    const newCurrentMana = Math.min(allChampions[index].totalMana, Math.round(allChampions[index].mana + manaIncrement))
+                    const newCurrentMana = Math.min(allChampions[index].totalMana, Math.round(allChampions[index].mana + manaIncrement));
+
+                    // Account for omnivamp
+                    if (projectile.attacker.team === 'user') {
+                      const actualIndex = userChampionsArchive[projectile.attacker.specialIndex].index;
+                      if (allChampions[actualIndex].alive) {
+                        allChampions[actualIndex] = { ...allChampions[actualIndex], health: allChampions[actualIndex].health + Math.round(allChampions[actualIndex].omnivamp * postMitigationAttackDamage) };
+                      }
+                    } else {
+                      const actualIndex = enemyChampionsArchive[projectile.attacker.specialIndex].index;
+                      if (allChampions[actualIndex].alive) {
+                        allChampions[actualIndex] = { ...allChampions[actualIndex], health: allChampions[actualIndex].health + Math.round(allChampions[actualIndex].omnivamp * postMitigationAttackDamage) };
+                      }
+                    }
 
                     // Check for any constant threshold changes
                     if (allChampions[index].constantThreshold.length > 0) {
@@ -676,7 +733,8 @@ function Board({ enemyChampionsList, userChampionsList, initialPuzzleNumber }) {
                     attackCriticalDamage = allChampions[index].criticalDamage;
                   }
 
-                  const newProjectile = { type: 'attack', damage: allChampions[index].attackDamage + allChampions[index].attackDamage * attackCriticalDamage, extraDamage: allChampions[index].extraDamage + additionalAttackDamage, iteration: allChampions[index].attackProjectileSpeed }
+                  const newProjectile = { type: 'attack', damage: allChampions[index].attackDamage + allChampions[index].attackDamage * attackCriticalDamage, extraDamage: allChampions[index].extraDamage + additionalAttackDamage, iteration: allChampions[index].attackProjectileSpeed, 
+                    attacker: { specialIndex: allChampions[index].specialIndex, team: allChampions[index].specialIndex } };
                   const newProjectileList = [ ...closestEnemy.projectiles, newProjectile ];
                   allChampions[closestEnemy.index] = { ...closestEnemy, projectiles: newProjectileList };
 
@@ -747,7 +805,8 @@ function Board({ enemyChampionsList, userChampionsList, initialPuzzleNumber }) {
                     abilityCriticalDamage = allChampions[index].criticalDamage;
                   }
 
-                  const newProjectile = { type: 'ability', damage: allChampions[index].abilityDamage + allChampions[index].abilityDamage * abilityCriticalDamage, extraDamage: allChampions[index].extraDamage + additionalAbilityDamage, iteration: allChampions[index].abilityProjectileSpeed }
+                  const newProjectile = { type: 'ability', damage: allChampions[index].abilityDamage + allChampions[index].abilityDamage * abilityCriticalDamage, extraDamage: allChampions[index].extraDamage + additionalAbilityDamage, iteration: allChampions[index].abilityProjectileSpeed,
+                    attacker: { specialIndex: allChampions[index].specialIndex, team: allChampions[index].specialIndex } };
                   const newProjectileList = [ ...closestEnemy.projectiles, newProjectile ];
                   allChampions[closestEnemy.index] = { ...closestEnemy, projectiles: newProjectileList };
 
@@ -785,10 +844,21 @@ function Board({ enemyChampionsList, userChampionsList, initialPuzzleNumber }) {
         
         // console.log('after champions', allChampions);
 
+        var userChampionsArchive = [];
+        var enemyChampionsArchive = [];
+
+        allChampions.forEach(champion => {
+          if (champion.team === 'user') {
+            userChampionsArchive.push(champion);
+          } else {
+            enemyChampionsArchive.push(champion);
+          }
+        })
+
         const aliveChampions = allChampions.filter(x => x.alive); 
 
-        const updatedUserChampions = [];
-        const updatedEnemyChampions = [];
+        var updatedUserChampions = [];
+        var updatedEnemyChampions = [];
         var iteration = 0;
 
         aliveChampions.forEach(champion => {
@@ -797,6 +867,7 @@ function Board({ enemyChampionsList, userChampionsList, initialPuzzleNumber }) {
               ...champion, index: iteration
             };
             updatedUserChampions.push(champion);
+            userChampionsArchive[champion.specialIndex] = champion;
             if (!selectedChampionCompleted) {
               setSelectedChampion(champion);
               selectedChampionCompleted = true;
@@ -806,6 +877,7 @@ function Board({ enemyChampionsList, userChampionsList, initialPuzzleNumber }) {
               ...champion, index: iteration
             };
             updatedEnemyChampions.push(champion);
+            enemyChampionsArchive[champion.specialIndex] = champion;
             if (!selectedChampionCompleted) {
               setSelectedChampion(champion);
               selectedChampionCompleted = true;
@@ -826,6 +898,8 @@ function Board({ enemyChampionsList, userChampionsList, initialPuzzleNumber }) {
 
         setUserChampions(updatedUserChampions);
         setEnemyChampions(updatedEnemyChampions);
+        setUserChampionsArchive(userChampionsArchive);
+        setEnemyChampionsArchive(enemyChampionsArchive);
 
         if (updatedUserChampions.length === 0) {
           endCombat();
@@ -838,7 +912,7 @@ function Board({ enemyChampionsList, userChampionsList, initialPuzzleNumber }) {
       updateChampionsSequentially(startTime);
       globalIteration += 1;
     }
-  }, [userChampions, isCombatActive, enemyChampions]);
+  }, [userChampions, isCombatActive, enemyChampions, selectedChampion]);
 
   const areChampionsOverlapping = (champion1, champion2) => {
     const dx = champion1.currentPosition.left - champion2.currentPosition.left;
