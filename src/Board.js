@@ -346,6 +346,9 @@ function Board({ enemyChampionsList, userChampionsList, initialPuzzleNumber }) {
                 } else if (stat.type === 'damageExtra') {
                   allChampions[index] = { ...allChampions[index], damageExtra: allChampions[index].damageExtra - stat.value };
 
+                } else if (stat.type === 'crownguard') {
+                  allChampions[index] = { ...allChampions[index], abilityPower: allChampions[index].abilityPower + 35 };
+                  
                 } else {
                   // Throw an error if the stat is not implemented yet
                   throw new Error('This is a stat that is not implemented yet.');
@@ -366,7 +369,7 @@ function Board({ enemyChampionsList, userChampionsList, initialPuzzleNumber }) {
               } else if (stat.type === 'shield') {
                 // Want to only apply each shield once
                 if (!stat.applied) {
-                  allChampions[index] = { ...allChampions[index], shield: Math.round(allChampions[index].shield + stat.value) };
+                  allChampions[index] = { ...allChampions[index], shield: Math.round(allChampions[index].originalHealth * 0.3) };
                   allChampions[index].stats[allChampionsStatIteration] = { ...stat, applied: true }
                 }
 
@@ -376,6 +379,12 @@ function Board({ enemyChampionsList, userChampionsList, initialPuzzleNumber }) {
               } else if (stat.type === 'damageExtra') {
                 allChampions[index] = { ...allChampions[index], damageExtra: allChampions[index].damageExtra + stat.value };
 
+              } else if (stat.type === 'crownguard') {
+                if (!stat.applied) {
+                  allChampions[index] = { ...allChampions[index], shield: Math.round(allChampions[index].shield + stat.value) };
+                  allChampions[index].stats[allChampionsStatIteration] = { ...stat, applied: true }
+                }
+                
               } else {
                 // Throw an error if the stat is not implemented yet
                 throw new Error('This is a stat that is not implemented yet.');

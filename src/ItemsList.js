@@ -35,6 +35,8 @@ const items = {
     onAttackAbility: {}, oncePerCombat: {}, everyXSeconds: {} },
   "Jeweled Gauntlet": { image: "https://rerollcdn.com/items/DragonsClaw.png", type: "Dragon's Claw", flatStats: { abilityPower: 10 }, percentStats: { attackSpeed: 0.18 }, description: "Every 2 seconds, regenerate 10% maximum Health.", 
     onAttackAbility: {}, oncePerCombat: {}, everyXSeconds: {} },
+  "Crownguard": { image: "https://rerollcdn.com/items/DragonsClaw.png", type: "Dragon's Claw", flatStats: { abilityPower: 10 }, percentStats: { attackSpeed: 0.18 }, description: "Every 2 seconds, regenerate 10% maximum Health.", 
+    onAttackAbility: {}, oncePerCombat: {}, everyXSeconds: { type: 'crownguard', iteration: 8 * MOVEMENT_SPEED, applied: false } },
 }
 
 function GetItemDetails(itemKey) {
