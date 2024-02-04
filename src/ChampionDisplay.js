@@ -14,7 +14,6 @@ const ChampionDisplay = (champion) => {
   const currentChampionItems = currentChampion.items;
   const currentChampionAbility = GetAbilityDetails(currentChampion.type);
 
-  console.log(currentChampionAbility);
   var itemDetailsOne = null;
   var itemDetailsTwo = null;
   var itemDetailsThree = null;
