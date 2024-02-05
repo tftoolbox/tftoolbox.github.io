@@ -524,6 +524,8 @@ function Board({ enemyChampionsList, userChampionsList, initialPuzzleNumber }) {
 
                     // Find new mana and health for champion
                     var newHealth = allChampions[index].health - shieldDifference;
+                    console.log(`old health of champion ${allChampions[index].team} ${allChampions[index].type} from ${projectile.type}: `, allChampions[index].health);
+                    console.log(`new health of champion ${allChampions[index].team} ${allChampions[index].type} from ${projectile.type}: `, newHealth);
                     const manaIncrement = Math.min(42.5, (0.01 * projectile.damage) + (0.07 * postMitigationAttackDamage));
                     const newCurrentMana = Math.min(allChampions[index].totalMana, Math.round(allChampions[index].mana + manaIncrement));
 
@@ -627,6 +629,8 @@ function Board({ enemyChampionsList, userChampionsList, initialPuzzleNumber }) {
 
                     // Find new mana and health for champion
                     var newHealth = allChampions[index].health - shieldDifference;
+                    console.log(`old health of champion ${allChampions[index].team} ${allChampions[index].type} from ${projectile.type}: `, allChampions[index].health);
+                    console.log(`new health of champion ${allChampions[index].team} ${allChampions[index].type} from ${projectile.type}: `, newHealth);
                     const manaIncrement = Math.min(42.5, (0.01 * projectile.damage) + (0.07 * postMitigationAttackDamage));
                     const newCurrentMana = Math.min(allChampions[index].totalMana, Math.round(allChampions[index].mana + manaIncrement));
 
@@ -761,6 +765,8 @@ function Board({ enemyChampionsList, userChampionsList, initialPuzzleNumber }) {
 
                     // Find new mana and health for champion
                     var newHealth = allChampions[index].health - shieldDifference;
+                    console.log(`old health of champion ${allChampions[index].team} ${allChampions[index].type} from ${projectile.type}: `, allChampions[index].health);
+                    console.log(`new health of champion ${allChampions[index].team} ${allChampions[index].type} from ${projectile.type}: `, newHealth);
                     const manaIncrement = Math.min(42.5, (0.01 * projectile.damage) + (0.07 * postMitigationAbilityDamage));
                     const newCurrentMana = Math.min(allChampions[index].totalMana, Math.round(allChampions[index].mana + manaIncrement))
 
@@ -836,6 +842,8 @@ function Board({ enemyChampionsList, userChampionsList, initialPuzzleNumber }) {
 
                     // Find new mana and health for champion
                     var newHealth = allChampions[index].health - shieldDifference;
+                    console.log(`old health of champion ${allChampions[index].team} ${allChampions[index].type} from ${projectile.type}: `, allChampions[index].health);
+                    console.log(`new health of champion ${allChampions[index].team} ${allChampions[index].type} from ${projectile.type}: `, newHealth);
                     const manaIncrement = Math.min(42.5, (0.01 * projectile.damage) + (0.07 * postMitigationAbilityDamage));
                     const newCurrentMana = Math.min(allChampions[index].totalMana, Math.round(allChampions[index].mana + manaIncrement))
 
@@ -997,7 +1005,7 @@ function Board({ enemyChampionsList, userChampionsList, initialPuzzleNumber }) {
                   const newCurrentMana = Math.min(allChampions[index].totalMana, allChampions[index].mana + 10);
                   const newIterationsRemaining = { ...allChampions[index].iterationsRemaining, attack: allChampions[index].attackSpeed };
                   allChampions[index] = { ...allChampions[index], mana: newCurrentMana, iterationsRemaining: newIterationsRemaining };
-                  // console.log(`${allChampions[index].type} of ${allChampions[index].team} fired an attack to ${closestEnemy.type}.`);
+                  console.log(`${allChampions[index].type} of ${allChampions[index].team} fired an attack to ${closestEnemy.type}.`);
 
                 } else {
                   // Reduce iterations until casting next attack by 1
@@ -1038,7 +1046,7 @@ function Board({ enemyChampionsList, userChampionsList, initialPuzzleNumber }) {
 
                   const newIterationsRemaining = { ...allChampions[index].iterationsRemaining, ability: allChampions[index].abilityCastTime };
                   allChampions[index] = { ...allChampions[index], mana: 0, iterationsRemaining: newIterationsRemaining };
-                  // console.log(`${allChampions[index].type} of ${allChampions[index].team} fired an ability to ${closestEnemy.type}.`);
+                  console.log(`${allChampions[index].type} of ${allChampions[index].team} fired an ability to ${closestEnemy.type}.`);
 
                 } else {  
                   // Reduce iterations until casting next ability by 1
@@ -1117,7 +1125,7 @@ function Board({ enemyChampionsList, userChampionsList, initialPuzzleNumber }) {
         const waitTime = ITERATION_CYCLE - timeDifference;
         if (waitTime >= 0) {
           await new Promise(resolve => setTimeout(resolve, waitTime));    
-          // console.log(`${globalIteration} Complete w/ ${waitTime + timeDifference} ms.`);
+          console.log(`${globalIteration} Complete w/ ${waitTime + timeDifference} ms.`);
         } else {
           console.log('ERROR! ITERATION CYCLE TIME NOT LONG ENOUGH!');
         }
