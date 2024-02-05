@@ -442,12 +442,12 @@ function Board({ enemyChampionsList, userChampionsList, initialPuzzleNumber }) {
                 // Check if there are oncePerCombat items to check with health thresholds
                 if (allChampions[index].oncePerCombat.length > 0) {
                   // Check if this damage will activate any oncePerCombat items
-                  const thresholdHealth = Math.round(allChampions[index].oncePerCombat.health * allChampions[index].originalHealth);
                   var updatedOncePerCombatAttack = [];
 
                   // Iterate through each item that is once-per-combat
                   for (const item of allChampions[index].oncePerCombat) {
-                    if (thresholdHealth <= postMitigationAttackDamage) {
+                    const thresholdHealth = Math.round(allChampions[index].oncePerCombat.health * allChampions[index].originalHealth);
+                    if (thresholdHealth >= allChampions[index].health + allChampions[index].shield - postMitigationAttackDamage) {
                       // Iterate through the different one-time stat boosts that can happen
                       for (const statBoost of item.type) {
                         if (statBoost.type === 'armor') {
@@ -478,7 +478,7 @@ function Board({ enemyChampionsList, userChampionsList, initialPuzzleNumber }) {
                     }
                   }
                   
-                  allChampions[index] = { ...allChampions[index], updatedOncePerCombatAttack };
+                  allChampions[index] = { ...allChampions[index], oncePerCombat: updatedOncePerCombatAttack };
 
                   // Check if the damage will kill the champion or not
                   if (allChampions[index].health + allChampions[index].shield <= postMitigationAttackDamage) {
@@ -582,7 +582,6 @@ function Board({ enemyChampionsList, userChampionsList, initialPuzzleNumber }) {
                     } 
                   }
                   
-                  allChampions[index] = { ...allChampions[index], oncePerCombat: [] };
                 } else {
                   // Check if the damage will kill the champion or not
                   if (allChampions[index].health + allChampions[index].shield <= postMitigationAttackDamage) {
@@ -693,12 +692,12 @@ function Board({ enemyChampionsList, userChampionsList, initialPuzzleNumber }) {
                 // Check if there are oncePerCombat items to check with health thresholds
                 if (allChampions[index].oncePerCombat.length > 0) {
                   // Check if this damage will activate any oncePerCombat items
-                  const thresholdHealth = Math.round(allChampions[index].oncePerCombat.health * allChampions[index].originalHealth);
                   var updatedOncePerCombatAbility = [];
 
                   // Iterate through each item that is once-per-combat
                   for (const item of allChampions[index].oncePerCombat) {
-                    if (thresholdHealth <= postMitigationAbilityDamage) {
+                    const thresholdHealth = Math.round(item.health * allChampions[index].originalHealth);
+                    if (thresholdHealth >= allChampions[index].health + allChampions[index].shield - postMitigationAbilityDamage) {
                       // Iterate through the different one-time stat boosts that can happen
                       for (const statBoost of item.type) {
                         if (statBoost.type === 'armor') {
@@ -707,8 +706,8 @@ function Board({ enemyChampionsList, userChampionsList, initialPuzzleNumber }) {
                         } else if (statBoost.type === 'magicResist') {
                           allChampions[index] = { ...allChampions[index], magicResist: allChampions[index].magicResist + statBoost.value };
   
-                        } else if (statBoost.type === 'maxHealth') {
-                          allChampions[index] = { ...allChampions[index], originalHealth: allChampions[index].originalHealth + statBoost.value, health: allChampions[index].health + statBoost.value };
+                        } else if (statBoost.type === 'originalHealth') {
+                          allChampions[index] = { ...allChampions[index], originalHealth: allChampions[index].originalHealth + allChampions[index].originalHealth * statBoost.value, health: allChampions[index].health + allChampions[index].originalHealth * statBoost.value };
   
                         } else if (statBoost.type === 'attackDamage') {
                           allChampions[index] = { ...allChampions[index], attackDamage: Math.round(allChampions[index].attackDamage + allChampions[index].attackDamage * statBoost.value) };
@@ -729,7 +728,7 @@ function Board({ enemyChampionsList, userChampionsList, initialPuzzleNumber }) {
                     }
                   }
                   
-                  allChampions[index] = { ...allChampions[index], updatedOncePerCombatAbility };
+                  allChampions[index] = { ...allChampions[index], oncePerCombat: updatedOncePerCombatAbility };
 
                   // Check if the damage will kill the champion or not
                   if (allChampions[index].health + allChampions[index].shield <= postMitigationAbilityDamage) {
@@ -805,7 +804,6 @@ function Board({ enemyChampionsList, userChampionsList, initialPuzzleNumber }) {
                     } 
                   }
                   
-                  allChampions[index] = { ...allChampions[index], oncePerCombat: [] };
                 } else {
                   // Check if the damage will kill the champion or not
                   if (allChampions[index].health + allChampions[index].shield <= postMitigationAbilityDamage) {

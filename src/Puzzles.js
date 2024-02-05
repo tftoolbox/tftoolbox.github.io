@@ -1,8 +1,8 @@
 import ChampionsList from './ChampionsList';
 
 const puzzlesList = [
-	[ChampionsList([['Corki', 1, false, []]], 'enemy', [[0,0]]),
-	 ChampionsList([['Corki', 1, false, ["Guardbreaker"]]], 'user')],
+	[ChampionsList([['Corki', 2, false, []]], 'enemy', [[0,0]]),
+	 ChampionsList([['Tahm Kench', 1, false, ["Protector's Vow"]]], 'user')],
 	// [ChampionsList([['Corki', 1, false, []], ['Tahm Kench', 1, false, ['Deathblade']]], 'enemy', [[0,0], [2, 2]]),
 	//  ChampionsList([['Corki', 1, false, ['Chain Vest', 'Deathblade']], ['Tahm Kench', 2, false, []]], 'user')],
 	// [ChampionsList([['Jinx', 1, false, []], ['Taric', 1, false, []], ['Evelynn', 2, false, ['Deathblade']]], 'enemy', [[5,0], [2, 3], [3, 3]]),
